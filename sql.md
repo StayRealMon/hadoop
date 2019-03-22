@@ -1,19 +1,19 @@
 # Join 从句 #
 ## 内连接 全外连接 左、右连接 交叉连接 ##
 > **Inner join --两个列的交集**
-> **Left Out join**，--LEFT JOIN结果中必包含坐标中的记录  操作索引（左表减去左右交集
-> **Right Out join **，-- RIGHT JOIN结果中必然包含右表中的记录
-> **Full join**  --可用UNION ALL 连接左右join 变为full join
+> **Left Out join**，--LEFT JOIN结果中必包含坐标中的记录  操作索引（左表减去左右交集，即使右表中没有匹配，也从左表返回所有的行
+> **Right Out join **，-- RIGHT JOIN结果中必然包含右表中的记录，即使左表中没有匹配，也从右表返回所有的行
+> **Full join**  --可用UNION ALL 连接左右join 变为full join，只要其中一个表中存在匹配，就返回行
 > **Cross join** –笛卡尔积 cartesian  叉乘 a×b
 
 
 ## JOIN 连接优化查询 ##
-> **Trick1**
-> Update a.x set a.x = x where a.x in (select b.x from a join b where a.x = b.x)
-> Update a join (select b.x from a join b on a.x = b.x) b on a.x = b.x set a.x = x
-> **Trick2**
-> Select a.x, a.y, (select b.z from b where b.z = a.z) from a
-> Select a.x , a.y, a.z from a left join b on a.x = b.x
+    **Trick1**
+    Update a.x set a.x = x where a.x in (select b.x from a join b where a.x = b.x)
+    Update a join (select b.x from a join b on a.x = b.x) b on a.x = b.x set a.x = x
+    **Trick2**
+    Select a.x, a.y, (select b.z from b where b.z = a.z) from a
+    Select a.x , a.y, a.z from a left join b on a.x = b.x
 
 ## 数据库应用系统涉及三种模型 ##
 > **概念模型、逻辑模型和物理模型**
@@ -67,6 +67,12 @@
 > 只要有一个在读，就不允许写，而只要有一个在读，另一个就还可以读。
 > 只要有一个再写，就不允许其他的读，也不允许其他的写。
 
+    CREATE DATABASE my_db
+    CREATE TABLE 表名称(列名称1 数据类型,列名称2 数据类型,
+    ....
+    )
+
+
 ## 关系数据模型 ##
 > **数据结构/操作集合/完整性约束**
 > 完整性规则：实体完整性（Entity Integrity)主键不为空
@@ -96,6 +102,7 @@
 > select id from t where num=20
 > 
 > union和union all的区别是,union会自动压缩多个结果集合中的重复结果，而union all则将所有的结果全部显示出来，不管是不是重复。
+> **UNION** 操作符用于合并两个或多个 SELECT 语句的结果集。请注意，UNION 内部的 SELECT 语句必须拥有相同数量的列。列也必须拥有相似的数据类型。同时，每条 SELECT 语句中的列的顺序必须相同。如果允许重复的值，请使用 UNION ALL。
 
 ## 故障 ##
 > **事务故障**是由于程序执行错误而引起事务非预期的、异常终止的故障。它发生在单个事务的局部范围内，实际上就是程序的故障。
@@ -133,3 +140,70 @@
 ## DBS&DBMS&DB ##
 > DBS由数据库(数据)、DBMS(软件)、DBA(人员)、硬件平台(硬件)、软件平台5个部分构成。其中DBMS是数据库系统的核心，它负责数据库中的数据组织、数据操纵、数据维护、控制及保护和数据服务等工作。
 >>DBS包括DBMS和DB
+
+## 数据类型 ##
+> **integer(size)，int(size)，smallint(size)，tinyint(size)**
+> 仅容纳整数。在括号内规定数字的最大位数。
+> **decimal(size,d)，numeric(size,d)**
+> 容纳带有小数的数字。"size" 规定数字的最大位数。"d" 规定小数点右侧的最大位数。
+> **char(size)**	
+> 容纳固定长度的字符串（可容纳字母、数字以及特殊字符）。在括号中规定字符串的长度。
+> **varchar(size)**	
+> 容纳可变长度的字符串（可容纳字母、数字以及特殊的字符）。在括号中规定字符串的最大长度。
+> **date(yyyymmdd)**	
+> 容纳日期。
+
+**SELECT INTO **语句从一个表中选取数据，然后把数据插入另一个表中。语句常用于创建表的备份复件或者用于对记录进行存档。
+
+    select from where | group by | having | order by | limit
+    
+    SELECT DISTINCT Company FROM Orders
+    SELECT * FROM Persons WHERE Year>1965
+    SELECT * FROM Persons WHERE (FirstName='Thomas' OR FirstName='William') AND LastName='Carter'
+    SELECT * FROM Persons WHERE LastName IN ('Adams','Carter')
+    SELECT Company, OrderNumber FROM Orders ORDER BY Company DESC, OrderNumber ASC
+    SELECT * FROM Persons WHERE LastName NOT BETWEEN 'Adams' AND 'Carter'
+    SELECT LastName AS Family, FirstName AS Name
+    FROM Persons as p
+    
+    SELECT * FROM Persons LIMIT 5
+    SELECT TOP 50 PERCENT * FROM Persons
+    SELECT * FROM Persons WHERE City NOT LIKE '_g%'
+    //不以A或L或N开头的Person
+    SELECT * FROM Persons WHERE City LIKE '[!ALN]%'
+    
+    INSERT INTO Persons (LastName, Address) VALUES ('Wilson', 'Champs-Elysees')
+    UPDATE Person SET Address = 'Zhongshan 23', City = 'Nanjing' WHERE LastName = 'Wilson'
+    DELETE FROM Person WHERE LastName = 'Wilson'
+
+    //创建时增加UNIQUE约束
+    CREATE TABLE Persons(
+    Id_P int NOT NULL PRIMARY KEY AUTO INCREMENT,
+
+    City varchar(255) DEFAULT 'Sandnes',
+    OrderDate date DEFAULT GETDATE(),
+
+    FOREIGN KEY (Id_P) REFERENCES Persons(Id_P),
+    CONSTRAINT uc_PersonID UNIQUE (Id_P,LastName),
+
+    CHECK (Id_P>0)
+    )
+
+    //修改&删除约束
+    ALTER TABLE Persons
+    ADD CONSTRAINT uc_PersonID UNIQU (Id_P,LastName)
+    DROP CONSTRAINT uc_PersonID
+
+    //在常常被搜索的列（以及表）上面创建索引
+    CREATE UNIQUE INDEX index_name ON table_name (column_name DESC)
+
+
+    //视图是基于 SQL 语句的结果集的可视化的表
+    CREATE VIEW view_name AS
+    SELECT column_name(s)
+    FROM table_name
+    WHERE condition
+
+    //自带函数
+    SELECT Customer,SUM(OrderPrice) FROM Orders GROUP BY Customer HAVING SUM(OrderPrice)<2000
+    SELECT ProductName, UnitPrice, FORMAT(Now(),'YYYY-MM-DD') as PerDate FROM Products
