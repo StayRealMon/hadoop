@@ -12,3 +12,4 @@
 9. sudo apt-get install cmake/gcc/g++  (--version)
 10. sudo git clone https://github.com/aksnzhy/xlearn.git
 11. head/tail -n 10 /etc/profile
+12. wc -l train.txt
