@@ -135,7 +135,44 @@ SId 学生编号,CId 课程编号,score 分数
 		HAVING COUNT(*)>=(SELECT COUNT(*)FROM test_Course));
 
 - 查询至少有一门课与学号为" 01 "的同学所学相同的同学的信息
-
+		SELECT stu.* from test_SC sc2 INNER JOIN test_Student stu on stu.SId = sc2.SId 
+		where sc2.CId NOT in (SELECT sc1.CId from test_SC sc1 where sc1.SId='07');
 
 
 - 查询和" 01 "号的同学学习的课程完全相同的其他同学的信息
+
+
+
+- 查询没学过"张三"老师讲授的任一门课程的学生姓名
+
+		SELECT stu.Sname from test_Student stu 
+		WHERE stu.SId not in 
+		(SELECT sc.SId from test_SC sc INNER JOIN test_Course co on co.CId = sc.CId
+		INNER JOIN test_Teacher te on te.TId = co.TId WHERE te.Tname = '张三')
+
+- 查询两门及其以上不及格课程的同学的学号，姓名及其平均成绩
+
+		SELECT stu.SId, stu.Sname, AVG(sc.Score) avge from test_Student stu 
+		INNER JOIN test_SC sc ON stu.SId = sc.SId
+		WHERE sc.Score < 60
+		GROUP BY sc.SId
+		HAVING COUNT(*) > 1
+
+- 检索" 01 "课程分数小于 60，按分数降序排列的学生信息
+
+		SELECT stu.* ,res.Score from test_Student stu 
+		INNER JOIN (SELECT SId, Score from test_SC sc WHERE Score<60 and CId = '01')res
+		ON res.SId = stu.SId ORDER BY Score DESC
+
+- 按平均成绩从高到低显示所有学生的所有课程的成绩以及平均成绩
+
+		select res1.CId,Cname,cont,ma,mi,avge,notbad,okay,good,best FROM 
+		(SELECT CId, AVG(Score) avge ,COUNT(*)cont,MAX(Score) ma,MIN(Score) mi, 
+		COUNT(CASE WHEN sc.Score>=60 THEN 1 ELSE NULL END)/COUNT(sc.SId) notbad,
+		COUNT(CASE WHEN sc.Score>=70 and sc.Score<80  THEN 1 ELSE NULL END)/COUNT(sc.SId) okay,
+		COUNT(CASE WHEN sc.Score>=80 and sc.Score<90  THEN 1 ELSE NULL END)/COUNT(sc.SId) good,
+		COUNT(CASE WHEN sc.Score>=90 and sc.Score<100  THEN 1 ELSE NULL END)/COUNT(sc.SId) best
+		from test_SC sc GROUP BY CId ORDER BY avge DESC)res1
+		LEFT JOIN test_Course cour on cour.CId = res1.CId
+
+- 查询各科成绩最高分、最低分和平均分
