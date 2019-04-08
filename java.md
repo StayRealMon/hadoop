@@ -29,3 +29,36 @@
 > ThreadLocal继承Object，相当于没继承任何特殊的。
 > ThreadLocal没有实现任何接口。
 > ThreadLocal并不是一个Thread，而是Thread的局部变量。
+
+## 位运算 ##
+> 运算对象为数字的补码，而不是二进制码。当补码的符号位为1时，说明该补码对应的是负数，所以根据补码求原码的时候遵循负数的原则，补码取反加一。如果符号位为0时，则该补码对应的原码与其相同。
+> -3：
+> 1000 0011 （原码）
+> 1111 1100 （反码）
+> 1111 1101 （补码）（这是-3在计算机中的表示形式）
+> ~（-3）：
+> 0000 0010 （补码）（~（-3）在计算机中的表示形式）
+> 所以~（-3）=4
+>  
+> 1：
+> 0000 0001 （原码，反码，补码）
+> ~1：
+> 1111 1110 （补码）（~1在计算机中的表示形式）
+> 1000 0010 （原码）
+> ~1=-2
+
+
+## ArrayList 、 LinkedList 、 HashMap ##
+HashMap实现Map接口，它允许任何类型的键和值对象，并允许将null用作键或值
+ArrayList和LinkedList均实现了List接口
+ArrayList的访问速度比LinkedList快
+
+Hashtable不允许 null 值(key 和 value 都不可以)，HashMap允许 null 值(key和value都可以)。 ArrayList和LinkedList均实现了List接口
+ArrayList基于数组实现，随机访问更快
+LinkedList基于链表实现，添加和删除更快
+
+A、HashMap实现了Map接口的，它的Key和Value都可以是null，但是Hashtable种，Key和Value都不能是null。
+B、ArrayList与LinkedList都实现了List接口，继承了AbstractList类。ArrayList是数组方式存储，也就是顺序存储，LinkedList是链式存储。LinkedList方便删除添加，ArrayList方便查找
+C、ArrayList底层是动态数组是实现，随机位置添加和删除，都需要移动数组的数据，而LinkedList底层是双向链表，只需要修改Node节点的引用。
+D、随机访问数组要比链表块
+![](https://uploadfiles.nowcoder.com/images/20180705/3807435_1530799430432_DBD7499309F7A0C283CA6E755CC5E6DA)
