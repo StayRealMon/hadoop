@@ -176,3 +176,7 @@ SId 学生编号,CId 课程编号,score 分数
 		LEFT JOIN test_Course cour on cour.CId = res1.CId
 
 - 查询各科成绩最高分、最低分和平均分
+
+## Sql排名和分组排名 ##
+> select a.*, @lastType := @temp, @temp := a.type, if(@lastType = @temp,@rank:= @rank + 1,@rank := 1) as rank 
+> from test a, (select @a := 0,@temp := 0,@rank :=0) b order by type,score;
