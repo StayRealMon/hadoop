@@ -189,3 +189,15 @@ Z是要截取字符串的长度，取值范围是正整数，若Z省略，则从
 
 	SELECT first_name FROM employees ORDER BY substr(first_name,length(first_name)-1)
 	SELECT first_name FROM employees ORDER BY substr(first_name,-2)
+
+## 聚合函数group_concat(X,Y) ##
+SQLite的聚合函数group_concat(X,Y)，其中X是要连接的字段，Y是连接时用的符号，可省略，默认为逗号。此函数必须与 GROUP BY 配合使用。
+	SELECT dept_no, group_concat(emp_no) AS employees
+	FROM dept_emp GROUP BY dept_no
+
+## CASE ##
+case用法： case a when **cond1** then **exp1** else **cond2** then **exp2** else **exp3**
+当a满足条件cond1时， 返回exp1；当a满足条件cond2时， 返回exp2；否则 返回exp3
+交换性别：
+
+	UPDATE salary SET sex = IF(sex = 'm','f','m');
