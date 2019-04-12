@@ -181,6 +181,15 @@ SId 学生编号,CId 课程编号,score 分数
 > select a.*, @lastType := @temp, @temp := a.type, if(@lastType = @temp,@rank:= @rank + 1,@rank := 1) as rank 
 > from test a, (select @a := 0,@temp := 0,@rank :=0) b order by type,score;
 
+## LIMIT &OFFSET##
+ LIMIT 和 OFFSET 关键字。LIMIT 后的数字代表返回几条记录，OFFSET 后的数字代表从第几条记录开始返回（第一条记录序号为0），也可理解为跳过多少条记录后开始返回.
+
+	SELECT * FROM employees LIMIT 5 OFFSET 5
+
+在 LIMIT X,Y 中，Y代表返回几条记录，X代表从第几条记录开始返回（第一条记录序号为0），切勿记反
+
+	SELECT * FROM employees LIMIT 5,5
+
 ## 截取函数 ##
 substr(X,Y,Z) 或 substr(X,Y) 函数的使用。
 其中X是要截取的字符串。
@@ -192,8 +201,24 @@ Z是要截取字符串的长度，取值范围是正整数，若Z省略，则从
 
 ## 聚合函数group_concat(X,Y) ##
 SQLite的聚合函数group_concat(X,Y)，其中X是要连接的字段，Y是连接时用的符号，可省略，默认为逗号。此函数必须与 GROUP BY 配合使用。
+
 	SELECT dept_no, group_concat(emp_no) AS employees
 	FROM dept_emp GROUP BY dept_no
+
+## CONCAT() ##
+MySQL的Concat函数，CONCAT(str1,str2,...) as con
+SQLLite，字符串连接用 ||
+
+	select concat(last_name , "'" , first_name) as name from employees
+	select (last_name || "'" || first_name) as name from employees
+
+
+## DISTINCT&GROUP BY 去重性能比较 ##
+数据量非常巨大时候，比如1000万中有300W重复数据，这时候的distinct的效率低于group by；
+对于相对重复量较小的数据量比如1000万中1万的重复量，用groupby的性能会低于distnct
+
+	select distinct salary from salaries where to_date='9999-01-01' order by salary desc;
+
 
 ## CASE ##
 case用法： case a when **cond1** then **exp1** else **cond2** then **exp2** else **exp3**
@@ -201,3 +226,11 @@ case用法： case a when **cond1** then **exp1** else **cond2** then **exp2** e
 交换性别：
 
 	UPDATE salary SET sex = IF(sex = 'm','f','m');
+
+交换座位：
+
+	select (case 
+	when mod(id,2)=1 and id = (select count(*)from seat) then id
+	when mod(id,2)=0 then id-1
+	else id+1
+	end) as id,student from seat order by id;
