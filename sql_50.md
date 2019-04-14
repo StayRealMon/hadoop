@@ -220,8 +220,9 @@ SQLLite，字符串连接用 ||
 	select distinct salary from salaries where to_date='9999-01-01' order by salary desc;
 
 
-## CASE ##
-case用法： case a when **cond1** then **exp1** else **cond2** then **exp2** else **exp3**
+## CASE & DECODE ##
+case用法： 
+case a when **cond1** then **exp1** else **cond2** then **exp2** else **exp3** end
 当a满足条件cond1时， 返回exp1；当a满足条件cond2时， 返回exp2；否则 返回exp3
 交换性别：
 
@@ -234,3 +235,27 @@ case用法： case a when **cond1** then **exp1** else **cond2** then **exp2** e
 	when mod(id,2)=0 then id-1
 	else id+1
 	end) as id,student from seat order by id;
+
+**DECODE**函数适合多值等值查询
+查询T_USER中的成绩 t_score 中成绩为65,95,73的记录显示为‘YES’否则显示"NO"。
+
+	select u_id , u_name , u_score , decode(u_score,
+       65, 'YES',
+       95, 'YES',
+       73, 'YES',
+	'NO') 
+	from T_USER ;
+
+
+##IF&IFNULL&NULLIF##
+**IF( expr1 , expr2 , expr3 )**
+SELECT IF(FALSE,1+1,1+2);
+select *,if(book_name='java','已卖完','有货') as product_status from book where price =50
+
+**IFNULL( expr1 , expr2 )**
+SELECT IFNULL(NULL,"11");	res-> 11
+SELECT IFNULL("00","11");	res-> 00
+
+**NULLIF(expr1,expr2)**：如果两个参数相等则返回NULL，否则返回第一个参数的值expr1
+select nullif(1,1)	res->null
+selectnullif(123,321);res->123
