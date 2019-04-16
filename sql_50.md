@@ -212,6 +212,10 @@ SQLLite，字符串连接用 ||
 	select concat(last_name , "'" , first_name) as name from employees
 	select (last_name || "'" || first_name) as name from employees
 
+## DATEDIFF() ##
+DATEDIFF是两个日期的天数差集。
+datediff(@today,@yesterday) = 1
+	SELECT a.id AS 'Id' FROM Weather a JOIN Weather b ON DATEDIFF(a.RecordDate, b.RecordDate) = 1 AND a.Temperature > b.Temperature;
 
 ## DISTINCT&GROUP BY 去重性能比较 ##
 数据量非常巨大时候，比如1000万中有300W重复数据，这时候的distinct的效率低于group by；
