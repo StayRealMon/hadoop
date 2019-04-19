@@ -8,6 +8,16 @@ TId 教师编号,Tname 教师姓名
 4. SC(<u>**SId,CId**</u>,score)
 SId 学生编号,CId 课程编号,score 分数
 
+		insert into Student values('04' , 'LI' , '1990-12-06' , 'male');
+		insert into Student values('05' , 'ZHOU' , '1991-12-01' , 'Female');
+		insert into Student values('06' , 'WU' , '1992-01-01' , 'Female');
+		insert into Student values('07' , 'ZHENG' , '1989-01-01' , 'Female');
+		insert into Student values('09' , 'ZHANG' , '2017-12-20' , 'Female');
+		insert into Student values('10' , 'LI' , '2017-12-25' , 'Female');
+		insert into Student values('11' , 'LI' , '2012-06-06' , 'Female');
+		insert into Student values('12' , 'ZHAO' , '2013-06-13' , 'Female');
+		insert into Student values('13' , 'SUN' , '2014-06-01' , 'Female');
+
 		create table Student(SId varchar(10),Sname varchar(10),Sage datetime,Ssex varchar(10));
 		insert into Student values('01' , '赵雷' , '1990-01-01' , '男');
 		insert into Student values('02' , '钱电' , '1990-12-21' , '男');
@@ -22,11 +32,22 @@ SId 学生编号,CId 课程编号,score 分数
 		insert into Student values('12' , '赵六' , '2013-06-13' , '女');
 		insert into Student values('13' , '孙七' , '2014-06-01' , '女');
 		
+		 create table Course(CId varchar(10),Cname nvarchar(10),TId varchar(10));
+		 insert into Course values('01' , 'Chinese' , '02');
+		 insert into Course values('02' , 'Math' , '01');
+		 insert into Course values('03' , 'English' , '03');
+
 		create table Course(CId varchar(10),Cname nvarchar(10),TId varchar(10));
 		insert into Course values('01' , '语文' , '02');
 		insert into Course values('02' , '数学' , '01');
 		insert into Course values('03' , '英语' , '03');
 		    
+
+	create table Teacher(TId varchar(10),Tname varchar(10));
+	insert into Teacher values('01' , 'ZHANGSAN');
+	insert into Teacher values('02' , 'LISI');
+	insert into Teacher values('03' , 'WANGWU');
+
 		create table Teacher(TId varchar(10),Tname varchar(10));
 		insert into Teacher values('01' , '张三');
 		insert into Teacher values('02' , '李四');
