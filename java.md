@@ -1,3 +1,5 @@
+> 重载，继承，多态，接口，虚函数，并发，线程
+
 ## 面向对象的基本原则 ##
 > s( Single-Resposibility Principle ): 单一职责原则
 > o( Open-Closed principle ): 开放封闭原则
@@ -20,6 +22,36 @@
 > **hashtable**：就比hashmap多了个线程安全
 > **enumeration**：枚举，相当于迭代器
 > 除了这些之外，其他的都是非线程安全的类和接口。
+
+## 线程安全 ##
+> 进程中有多个线程在同时运行，而这些线程可能会同时运行这段代码。如果每次运行结果和单线程运行的结果是一样的，而且其他的变量的值也和预期的是一样的，就是线程安全的。
+> 线程安全问题都是由全局变量及静态变量引起的。若每个线程中对全局变量、静态变量只有读操作，而无写操作，一般来说，这个全局变量是线程安全的；若有多个线程同时执行写操作，一般都需要考虑线程同步，否则的话就可能影响线程安全。
+![线程安全](https://uploadfiles.nowcoder.com/images/20160708/887525_1467945811956_2FA6EA0EFC9909BB317917FC1362F6AE)
+
+> LinkedList 和 ArrayList 都是不同步的，线程不安全；
+> Vector 和 Stack 都是同步的，线程安全；
+> Set是线程不安全的； 
+> Hashtable的方法是同步的，线程安全；
+> HashMap的方法不是同步的，线程不安全
+
+## 线程结束 ##
+> 1、run方法执行完成，线程正常结束
+> 2、线程抛出一个未捕获的Exception或者Error。可以通过其他线程调用pthread_cancel（）函数来终止另一个线程
+> 3、直接调用该线程的Stop方法结束线程（不建议使用，容易导致死锁）
+> 调用sleep()方法或者wait()方法时，只是暂时停止了该线程的运行，不是终止线程
+> 当一个优先级高的线程进入就绪状态时，它只是有较高的概率能够抢到CPU的执行权，不是一定就能抢到执行权
+
+## 线程的执行体 ##
+> run()用于定义线程的执行体
+> start()线程开启的方法，线程状态从new变成了runnable
+![线程执行体](https://uploadfiles.nowcoder.com/images/20180701/3807435_1530424646801_3658A873352D1D5FB9EF74D9F9F1F0B5)
+**wait() 与  notify/notifyAll()**
+ wait() 与  notify/notifyAll() 是放在同步代码块中的，因此线程在执行它们时，肯定是进入了临界区中的，即该线程肯定是获得了锁的。
+当线程执行wait()时，会把当前的锁释放，然后让出CPU，进入等待状态。
+ 当执行notify/notifyAll方法时，会唤醒一个处于等待该 对象锁 的线程，然后继续往下执行，直到执行完退出对象锁锁住的区域（synchronized修饰的代码块）后再释放锁。
+从这里可以看出，notify/notifyAll()执行后，并不立即释放锁，而是要等到执行完临界区中代码后，再释放。故，在实际编程中，我们应该尽量在线程调用notify/notifyAll()后，立即退出临界区。即不要在notify/notifyAll()后面再写一些耗时的代码。
+wait() 与  notify/notifyAll()都是放在同步代码块中才能够执行的。如果在执行wait() 与  notify/notifyAll() 之前没有获得相应的对象锁，就会抛出：java.lang.IllegalMonitorStateException异常。
+
 
 ## ThreadLocal ##
 > 1. ThreadLocal的类声明：public class ThreadLocal<T>。可以看出ThreadLocal并没有继承自Thread，也没有实现Runnable接口。
@@ -49,13 +81,13 @@
 
 
 ## ArrayList 、 LinkedList 、 HashMap ##
-HashMap实现Map接口，它允许任何类型的键和值对象，并允许将null用作键或值
-ArrayList和LinkedList均实现了List接口
-ArrayList的访问速度比LinkedList快
-
-Hashtable不允许 null 值(key 和 value 都不可以)，HashMap允许 null 值(key和value都可以)。 ArrayList和LinkedList均实现了List接口
-ArrayList基于数组实现，随机访问更快
-LinkedList基于链表实现，添加和删除更快
+> HashMap实现Map接口，它允许任何类型的键和值对象，并允许将null用作键或值
+> ArrayList和LinkedList均实现了List接口
+> ArrayList的访问速度比LinkedList快
+> 
+> Hashtable不允许 null 值(key 和 value 都不可以)，HashMap允许 null 值(key和value都可以)。 ArrayList和LinkedList均实现了List接口
+> ArrayList基于数组实现，随机访问更快
+> LinkedList基于链表实现，添加和删除更快
 
 > A、HashMap实现了Map接口的，它的Key和Value都可以是null，但是Hashtable种，Key和Value都不能是null。
 > B、ArrayList与LinkedList都实现了List接口，继承了AbstractList类。ArrayList是数组方式存储，也就是顺序存储，LinkedList是链式存储。LinkedList方便删除添加，ArrayList方便查找
@@ -164,9 +196,9 @@ LinkedList基于链表实现，添加和删除更快
 > 
 > 505（HTTP 版本不受支持）	服务器不支持请求中所用的 HTTP 协议版本。
 
-![TCP&UDP](https://i.imgur.com/SjN2AwX.png)
+![TCP&UDP](https://uploadfiles.nowcoder.com/images/20190421/4206388_1555855001078_3C367271FFE76FF6DEE3D39D4C6CCD6A)
 **TCP&UDP**
-![OSI](https://i.imgur.com/Akh5AWt.png)
+![OSI](https://uploadfiles.nowcoder.com/images/20190421/4206388_1555855008940_6F40E7C2ED3F3E542B4B5DE78D5E0CB9)
 **OSI**
 
 ## String类型的认识以及编译器优化 ##
@@ -207,6 +239,15 @@ LinkedList基于链表实现，添加和删除更快
 
 > 在一个子类被创建的时候，首先会在内存中创建一个父类对象，然后在父类对象外部放上子类独有的属性，两者合起来形成一个子类的对象。所以所谓的继承使子类拥有父类所有的属性和方法其实可以这样理解，子类对象确实拥有父类对象中所有的属性和方法，但是父类对象中的私有属性和方法，子类是无法访问到的，只是拥有，但不能使用。就像有些东西你可能拥有，但是你并不能使用。所以子类对象是绝对大于父类对象的，所谓的子类对象只能继承父类非私有的属性及方法的说法是错误的。可以继承，只是无法访问到而已。
 
+## 类的加载顺序 ##
+> (1) 父类静态代码块(包括静态初始化块，静态属性，但不包括静态方法)
+> (2) 子类静态代码块(包括静态初始化块，静态属性，但不包括静态方法 )
+> (3) 父类非静态代码块( 包括非静态初始化块，非静态属性 )
+> (4) 父类构造函数
+> (5) 子类非静态代码块 ( 包括非静态初始化块，非静态属性 )
+> (6) 子类构造函数
+> 其中：类中静态块按照声明顺序执行，并且(1)和(2)不需要调用new类实例的时候就执行了(意思就是在类加载到方法区的时候执行的)
+
 ## 堆栈 ##
 > **堆区**：只存放类对象，线程共享；
 > **方法区**：又叫静态存储区，存放class文件和静态数据，线程共享;
@@ -221,3 +262,51 @@ LinkedList基于链表实现，添加和删除更快
 > 
 > wait 和 sleep的区别：
 > sleep指线程被调用时，占着CPU不工作，形象地说明为“占着CPU睡觉”，此时，系统的CPU部分资源被占用，其他线程无法进入，会增加时间限制
+
+## 静态方法&实例方法 ##
+> **类方法**就是**静态方法**。其它的就是**实例方法**
+> 实例方法可以对当前对象的实例变量进行操作，也可以对类变量进行操作，但*类方法不能访问实例变量*。实例方法必须由实例对象来调用，而类方法除了可由实例对象调用外，还可以由类名直接调用。
+> 另外，在类方法中*不能使用 this 或 super*。 关于类方法的使用，有如下一些限制：
+> 1 在类方法中不能引用对象变量。
+> 2 在类方法中不能使用super、this关键字。
+> 3 类方法不能调用类中的对象方法。
+> 与类方法相比，实例方法*几乎没有什么限制*：
+> 1 实例方法可以引用对象变量（这是显然的），也可以引用类变量。
+> 2 实例方法中可以使用super、this关键字。
+> 3 实例方法中可以调用类方法。
+
+	class Super {
+	 private static void a() {
+	 }//类方法
+	 public static void b() {
+	 }//类方法
+	 public void c() {
+	 }//实例方法
+	 private void d() {
+	 }//实例方法
+	}
+	public class Son extends Super {
+	 public static void main(String args[]) {
+	 Super s = new Super();
+	 Super.a();//B错误，因a为私有的类方法，外类不可访问
+	 Super.b();//b为公有类方法，外类可用 类名.方法名 访问
+	 s.c();//c为公有实例方法，外类可用 实例名.方法名 访问
+	 s.d();//A错误，因d为私有实例方法，外类不可访问
+	 }
+	}
+
+## 控制反转IOC & 依赖注入DI ##
+> 依赖注入和控制反转是对同一件事情的不同描述，从某个方面讲，就是它们描述的角度不同。依赖注入是从应用程序的角度在描述，可以把依赖注入描述完整点：应用程序依赖容器创建并注入它所需要的外部资源；而控制反转是从容器的角度在描述，描述完整点：容器控制应用程序，由容器反向的向应用程序注入应用程序所需要的外部资源。
+
+# 关键字 #
+## volatile关键字 ##
+> volatile关键字用在多线程同步中，可保证读取的可见性
+> JVM保证从主内存加载到线程工作内存的值是最新的
+> volatile能禁止进行指令重排序
+> 不能保证线程安全
+
+> volatile是java中的一个类型修饰符。它是被设计用来修饰被不同线程访问和修改的变量。如果不加入volatile，基本上会导致这样的结果：要么无法编写多线程程序，要么编译器 失去大量优化的机会。
+> 1，可见性
+> 可见性指的是在一个线程中对该变量的修改会马上由工作内存（Work Memory）写回主内存（Main Memory），所以会马上反应在其它线程的读取操作中。顺便一提，工作内存和主内存可以近似理解为实际电脑中的高速缓存和主存，工作内存是线程独享的，主存是线程共享的。
+> 2，禁止指令重排序优化
+> 禁止指令重排序优化。大家知道我们写的代码（尤其是多线程代码），由于编译器优化，在实际执行的时候可能与我们编写的顺序不同。编译器只保证程序执行结果与源代码相同，却不保证实际指令的顺序与源代码相同。这在单线程看起来没什么问题，然而一旦引入多线程，这种乱序就可能导致严重问题。volatile关键字就可以从语义上解决这个问题。
