@@ -20,3 +20,6 @@ mysql -u root -p (root)
 14. 复制：1,2 co 3(1&2行复制到2之后)
 (n)yy -> p
 15. scp xxx-xxx.xml ts@192.168.0.1:/home/ts
+16. hosts文件生效
+16.1 sudo /etc/init.d/networking restart
+16.2 sudo /etc/init.d/dns-clean start

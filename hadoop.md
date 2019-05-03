@@ -27,6 +27,7 @@
 > OLTP 系统强调数据库内存效率，强调内存各种指标的命令率，强调绑定变量，强调并发操作；
 > OLAP 系统则强调数据分析，强调SQL执行市场，强调磁盘I/O，强调分区等
 
+![](https://uploadfiles.nowcoder.com/images/20190503/4206388_1556867239437_7E609B9F3168715D87EDB72E9ED9F4FE)
 ## Name Node ##
 Name Node作用：
 > ①管理文件sys的命名空间
@@ -71,4 +72,33 @@ Data Node作用：①对本节点进行管理②提交自己保存的Block列表
 2. NN根据本身维护的Block位置信息，对节点进行排序(根据副本放置策略)，返回给client
 3. client从DN List中排序级别较高**距离最近**的节点读取对应的块
 
+![](https://uploadfiles.nowcoder.com/images/20190503/4206388_1556867353821_2647913E15809B327E3669CC22982D66)
 ## MapReduce ##
+Input HDFS->Block split(切片，窗口机制，源文件变成<K,V>)->Map(将<K,V>转化为<K,V,Partition>)->sort(内部有序外部无序，根据Map生成的<K,V,P>中的K和P进行排序；排序前的<K,V,P>没有写入disk，而是在内存中的buffer缓冲区；排序结束后生成的文件按照Partition写入本地磁盘，供reduce节点拉去)->combiner(局部reduce，减少实际reduce的时间，)->shuffle(默认Hash映射，注意要减少节点之间的I/O)->partition->merge(依赖于Map作业的sort输出，这一步只是归并排序)->reduce->Output HDFS part00000
+> 默认一个Split为一个Block，即Block = Split。对于CPU密集计算而非I/O密集计算，小文件高密度计算，应将一个Block划分为更多的Split，让更多的Map任务处理，此时Block = n*Split = n*Map。实际上Map和Split必须是一一对应的
+> Split会把Input格式化为一条“记录”，一个“记录”对应一个Map任务；Merge后的reduce输入以“组”为单位，一个“组”有多条记录
+> 相同Key的“记录”为一“组”，一“组”对应一个reduce
+
+![](https://uploadfiles.nowcoder.com/images/20190503/4206388_1556867379355_3DFB2E12314E238166FBCFFE6329A170)
+## Hadoop1.x ##
+**client**：对源文件计算，划分为Split List；上传jar&Split List&配置信息到HDFS，供节点获取，最后触发JobTracker
+> 以作业为单位；规划作业的计算分布；提交作业到HDFS；请求JobTracker启动作业
+
+**JobTracker**：**调度**和**资源管理**；获取TaskTracker的心跳汇报，分析资源并进行调度
+> 核心主节点；调度所有的作业；根据心跳汇报监控集群的资源
+
+**TaskTracker**：心跳汇报信息给JobTracker；获取JobTracker分配的task，从HDFS中获取Jar&Split&配置文件，运行Task
+> 从节点，自身资源管理；和JobTracker心跳汇报状态和资源；获取Task
+
+JobTracker**负载过大**，**单点故障**；资源管理和作业调度位于同一个节点，有**强耦合**，若有其他作业又需要实现一个新的JobTracker；且不同的框架对资源不能进行**全局管理**；(YARN可以)
+
+## Hadoop2.x ##
+JobTracker的**①作业调度**由AppMaster管理；②资源管理由ResourceManager实现
+> Job1->RM->AM1->Container1
+> Job2->RM->AM2->Container2&Container3&Container4
+
+RM根据集群中NodeManager的心跳汇报获取节点资源状态。
+AM以作业为单位，负载到不同的节点进行作业调度，避免单点故障
+> 每一个Node中必有一个NM做状态资源心跳汇报；可能会有AM和Container；RM为每一个Job分配一个AM，挑选资源足够不忙的Node产生若干个Container，Container由NM监控管理
+
+![](https://uploadfiles.nowcoder.com/images/20190503/4206388_1556867387537_0B02D0BDA344265364CB97AE71F94407)
