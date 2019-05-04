@@ -78,6 +78,7 @@ Input HDFS->Block split(切片，窗口机制，源文件变成<K,V>)->Map(将<K
 > 默认一个Split为一个Block，即Block = Split。对于CPU密集计算而非I/O密集计算，小文件高密度计算，应将一个Block划分为更多的Split，让更多的Map任务处理，此时Block = n*Split = n*Map。实际上Map和Split必须是一一对应的
 > Split会把Input格式化为一条“记录”，一个“记录”对应一个Map任务；Merge后的reduce输入以“组”为单位，一个“组”有多条记录
 > 相同Key的“记录”为一“组”，一“组”对应一个reduce
+> Shuffle就是“Reducer启动后从所有的Map节点拉回属于自己数据的过程，是一个copying”或者“从Map算出结果之后，算出各自数据的分区号，直到Reducer拉取完自己的数据准备计算整个流程，是一个procedure”
 
 ![](https://uploadfiles.nowcoder.com/images/20190503/4206388_1556867379355_3DFB2E12314E238166FBCFFE6329A170)
 ## Hadoop1.x ##
