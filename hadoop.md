@@ -103,3 +103,124 @@ AM以作业为单位，负载到不同的节点进行作业调度，避免单点
 > 每一个Node中必有一个NM做状态资源心跳汇报；可能会有AM和Container；RM为每一个Job分配一个AM，挑选资源足够不忙的Node产生若干个Container，Container由NM监控管理
 
 ![](https://uploadfiles.nowcoder.com/images/20190503/4206388_1556867387537_0B02D0BDA344265364CB97AE71F94407)
+
+
+
+##WordCount##
+	import org.apache.hadoop.conf.Configuration;
+	import org.apache.hadoop.fs.Path;
+	import org.apache.hadoop.io.IntWritable;
+	import org.apache.hadoop.io.Text;
+	import org.apache.hadoop.mapred.lib.db.DBInputFormat;
+	import org.apache.hadoop.mapreduce.Job;
+	import org.apache.hadoop.mapreduce.Mapper;
+	import org.apache.hadoop.mapreduce.Reducer;
+	import org.apache.hadoop.mapreduce.lib.input.FileInputFormat;
+	import org.apache.hadoop.mapreduce.lib.input.TextInputFormat;
+	import org.apache.hadoop.mapreduce.lib.output.FileOutputFormat;
+	import org.apache.hadoop.mapreduce.lib.output.TextOutputFormat;
+	import org.apache.hadoop.mapreduce.lib.partition.HashPartitioner;
+	
+	import java.io.IOException;
+	import java.util.StringTokenizer;
+	
+	public class WordCount {
+	    //输入的参数不是基本类型，是包装后的泛型，支持①序列化和②排序比较。
+	    //IntWritable就是一个可序列化的类。
+	    //排序比较也有两种①数值比较②字典排序比较
+	    public static class TokenizerMapper extends Mapper<Object, Text, Text, IntWritable>{
+	        //one 和 word的声明写在map方法之外；是引用传递，会把上值覆盖
+	        //Map之后会将输出转化为Buffer数组，即将<K, V>序列化为数组，Buffer再往disk写持久化
+	        //因此one和word的声明不必写在map方法内部保留上次的计算值，仅仅需要创建两个对象用作值的引用
+	
+	        //one就是map之后<K, V>中的Value
+	        private final static IntWritable one = new IntWritable(1);
+	        //word是实际的单词，不是偏移量，是map后<K, V>中的Key
+	        private Text word = new Text();
+	
+	        public void map (Object key, Text value, Context context) throws IOException, InterruptedException {
+	            //StringTokenizer用来做切割；Object key表面上是Word实际上是Word在整个文件中的偏移量，是一个Long Int型
+	            StringTokenizer itr = new StringTokenizer(value.toString());
+	            while (itr.hasMoreTokens()){
+	                word.set(itr.nextToken());
+	                context.write(word, one);
+	            }
+	        }
+	    }
+	
+	    //Reducer方法
+	    public static class IntSumReducer extends Reducer<Text, IntWritable, Text, IntWritable>{
+	        //原语：相同的Key为一组，调用一次reduce方法，然后在方法内迭代这一组数据，进行计算max  count   sum  min  等等
+	        //result也是类似于one和word，声明在reduce外，写进缓冲区，因此是引用传递
+	        private IntWritable result = new IntWritable();
+	
+	        //hello 1
+	        //hello 1
+	        //hello 1
+	        //hello 1
+	
+	        //Key:      hello
+	        //Value:    (1,1,1,1)
+	
+	        public void reduce(Text key, Iterable<IntWritable> values, Context context) throws IOException, InterruptedException {
+	            int sum = 0;
+	            for (IntWritable val:values)
+	                sum+=val.get();
+	            //求和sum写进result中
+	            result.set(sum);
+	            //key直接写入context输出就ok了
+	            context.write(key, result);
+	        }
+	    }
+	
+	    public static void main(String[] args) throws IOException, ClassNotFoundException, InterruptedException {
+	        //配置信息
+	        Configuration conf = new Configuration();
+	        Job job = Job.getInstance(conf,"WordCountDemo");
+	//        Job job = new Job(conf,"WordCount");
+	        //设定输入格式
+	        job.setInputFormatClass(TextInputFormat.class);
+	        //输入文件的来源路径，以参数传递
+	        TextInputFormat.setInputPaths(job,args[0]);
+	        //或者直接将路径写死，且可以add多个输入
+	        Path input = new Path("/usr/local/test.txt");
+	        FileInputFormat.addInputPath(job, input);
+	        FileInputFormat.addInputPath(job, input);
+	        FileInputFormat.addInputPath(job, input);
+	
+	        //也支持数据库查询获取数据来源，或者直接获取表的名字字段等
+	        //DBInputFormat.setInput();
+	
+	        //打包时的类名？
+	        job.setJarByClass(WordCount.class);
+	        //设置Mapper
+	        job.setMapperClass(TokenizerMapper.class);
+	        //设置Combiner
+	        job.setCombinerClass(IntSumReducer.class);
+	        //设置Mapper输出，序列化，和Reducer方法的输入反序列化做对接
+	        job.setMapOutputKeyClass(Text.class);
+	        job.setMapOutputValueClass(IntWritable.class);
+	        //设置Partitioner
+	        job.setPartitionerClass(HashPartitioner.class);
+	        //设置Reduce
+	        job.setReducerClass(IntSumReducer.class);
+	        //传参Reduce数量
+	        job.setNumReduceTasks(Integer.parseInt(args[2]));
+	        //设置Reduce输出
+	        job.setOutputKeyClass(Text.class);
+	        job.setOutputValueClass(Text.class);
+	        job.setOutputFormatClass(TextOutputFormat.class);
+	        //文件结果的输出路径，可以传参也可以写死
+	        TextOutputFormat.setOutputPath(job, new Path(args[1]));
+	        //或者直接将路径写死，且仅支持一个输出路径
+	        Path output = new Path("/usr/local/res/");
+	        //需要对路径是否存在进行判断，存在就写，不存在就报错好了^o^y
+	        if(output.getFileSystem(conf).exists(output)) {
+	            FileOutputFormat.setOutputPath(job, output);
+	        }
+	
+	        System.exit(job.waitForCompletion(true)?0:1);
+	
+	    }
+	
+	}
