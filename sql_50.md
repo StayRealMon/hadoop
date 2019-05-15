@@ -8,6 +8,9 @@ TId 教师编号,Tname 教师姓名
 4. SC(<u>**SId,CId**</u>,score)
 SId 学生编号,CId 课程编号,score 分数
 
+		insert into Student values('01' , 'ZHAO' , '1990-01-01' , 'male');
+		insert into Student values('02' , 'QIAN' , '1990-12-21' , 'male');
+		insert into Student values('03' , 'SUN' , '1990-12-20' , 'male');
 		insert into Student values('04' , 'LI' , '1990-12-06' , 'male');
 		insert into Student values('05' , 'ZHOU' , '1991-12-01' , 'Female');
 		insert into Student values('06' , 'WU' , '1992-01-01' , 'Female');
