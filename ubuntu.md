@@ -23,3 +23,7 @@ mysql -u root -p (root)
 16. hosts文件生效
 16.1 sudo /etc/init.d/networking restart
 16.2 sudo /etc/init.d/dns-clean start
+17. wc -lwc user_data
+18. cat ad_operation.dat |head -n 30 | tail -n -20 前20行的后10行，即10-30
+19. cat ad_operation.dat |tail -n +10 | head -n 20 10行开始显示20行，即10-30
+20. sed -n '10,30p' user_data 直接查看10-30行
