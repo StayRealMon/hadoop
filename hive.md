@@ -87,3 +87,15 @@ EXAMPLE：
 
 TRANSFORM()中的数据是原来表格的字段fields
 AS()中的数据是处理后的数据，对应insert新表的fields
+
+## Hive API ##
+### Hive UDF ###
+用户定义函数(User-Defined Function)
+1. 普通的UDF 一个输入产生一个输出
+2. UDAF(User-Defined Aggregate Funtion) 多个输入一个输出
+3. UDTF(User-Defined Table-Generating Funtion) 一个输入多个输出
+
+> Hive支持Java编写的UDF，其他文件通过add file 和 select transform转化为流与Hive交互
+> 
+> Java编写普通的UDF，需要(1)用hadoop.io.*包，继承hadoop.hive.ql.exec.UDF，并且实现evaluate方法(可以实现多个，但是方法名不变，参数可以不同)(2)打成jar包，上传到本地路径即可(3)hive CLI窗口ADD JAR 'path/xx.jar';create temporary function FUN as 'jar包方法名';(4)select FUN(x,y) from table;
+> Java编写UDAF，需要(1)用hadoop.io.*包，继承hadoop.hive.ql.exec.UDAF，并且实现UDAFEvaluator接口(2)UDAFEvaluator下有5个方法：init()用于对中间结果进行初始化；iterate()接收传入的参数，进行迭代计算，返回值为boolean，需要计算的数据入口，类型为IntWritable或者TextWritable等可以序列化的类型；terminatePartial()没有参数，返回iterate中迭代后的数据；merge()接收terminatePartial的结果并合并中间值，返回值为boolean；teminate()返回最终的结果

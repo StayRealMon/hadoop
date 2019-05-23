@@ -1,0 +1,4 @@
+BigTable基于GFS实现，HBase基于HDFS实现
+特点：列存储、可伸缩、实时读写、分布式、高性能高可靠；存储非结构化数据，基于列而非行
+
+结构：Master/Slave架构，主节点HMaster，从节点为HRegionServer，HMaster通过zookeeper分配协调HRegionServer崩溃时的状况，HBaseClient也是通过zookeeper访问HRegionServer
