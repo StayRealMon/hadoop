@@ -1,12 +1,59 @@
-## 分布式数据库HBase ##
-BigTable基于GFS实现，HBase基于HDFS实现
-特点：列存储、可伸缩、实时读写、分布式、高性能高可靠；存储非结构化数据，基于列而非行
+## 分布式数据库Hadoop Database(HBase) ##
+1. BigTable基于GFS实现，HBase基于HDFS实现
+特点：**列存储**、**可伸缩**、**实时读写**、**分布式**、**高性能高可靠**；存储非结构化数据，基于列而非行，是**非关系型数据库** 如(Cassandra/HBase/MongoDB/Neo4j)
+2. 基于HDFS，利用MapReduce处理HBase中的海量数据，用zookeeper做分布式协同服务
+3. 主要用来存储非结构化或半结构化的松散数据(列存储NoSQL数据库)
+4. 区别于Hive数据仓库，HBase本身就是一个数据库
 
 结构：Master/Slave架构，主节点HMaster，从节点为HRegionServer。
 
 > HMaster是由zookeeper的选举机制选出的唯一管理节点。HMaster通过zookeeper分配协调HRegionServer崩溃时的Regions，HBaseClient也是通过zookeeper，得到HMaster、HRegionServer、-ROOT-核心数据之后，才能访问HRegionServer
 
 ![](https://uploadfiles.nowcoder.com/images/20190524/4206388_1558706443205_D3529FCA4176D9B2F36EADAC74ABA0C4)
+
+## HBase和关系数据库的差别 ##
+1. HBase仅提供文本类型数据，其他的自行处理
+2. 不支持表之间的关联操作查询
+3. 列式存储，CF由若干个文件保存
+4. 修改和删除实际上是插入了新的带特殊标志的记录，保存有多个版本。在StoreFile进行合并的时候进行数据更新，而不是直接覆盖
+5. 支持分布式，实现高性能数据增长
+6. 不必先定义可随时插入新的限定符
+
+## HBase数据模型 ##
+rowkey/timestamp/CF1(列族)/CF2/CF3
+定义表的时候需要声明列族，列是在插入数据的时候声明
+版本由timestamp决定是高或低，低版本的记录不会被删掉，合并的时候会被删除；版本覆盖解决数据更新的问题，保留多版本号，可以查询到历史
+CF2:q1 = val1 由rowkey+cf+q1即可确定到一个cell数据
+
+### rowkey ###
+决定一行记录/按照字典序排序/只能存储64k的字节数据
+rowkey的设计很关键，对实时查询
+设计的时候一般会加“业务字段”+“时间戳”，先按照业务字段排序，再按照时间戳排序
+若最新的时间排在上面，就拿MAX-time，最新时间就排在靠前
+
+### ColumnFamily列族&Qualifier限定符 ###
+CF是处理的最小单位，处理的时候可以没有列，但是一定要有CF。定义表模式(Table Schema)的时候必须预先指出CF的定义。如create ‘test’, 'course'
+每个q都归属于某一个CF，且可以动态按需在CF下加入新的q。CF下的列成员表示方法为course:math,course:english
+权限控制、存储和调优都是在CF的层面进行的
+同一CF下的数据存储在同意目录下，由几个文件保存
+
+### timestamp 时间戳(版本号)###
+版本控制，区别cell下的数据版本。按照时间倒序排列，最新的在最前
+64位整型数据
+
+### cell ###
+行列坐标交叉决定。有版本区分，即保存着不同版本的数据。
+cell中是未解析的**字节数组**，以字节码的形式存储，不需要数据类型定义。
+唯一确定：{rowkey,column(<cf>+<q>,version)} => cell
+
+### HLog ###
+普通的Hadoop Sequence File。有**操作日志**和操作的**数据信息**。
+HLog的Key是HLogKey对象，其中记录了写入数据的归属信息，包括table和region的名字，还有sequence number和timestamp
+HLog的Value是HBase的KeyValue对象，对应HFile中的KeyValue
+
+### 物理模型 ###
+物理模型实际上，把概念模型中的一个行分割，并按照列进行存储。其中空值不会被存储，未指明时间戳就返回最新的版本。
+按照rowkey进行分割，按照CF进行存储
 
 ## Region ##
 1. HBase分布式存储和负载均衡的最小单位。可以是Table划分出来的Region，也可以是.META.表划分出来的Region。
@@ -32,6 +79,12 @@ BigTable基于GFS实现，HBase基于HDFS实现
 2. 管理多个HRegion对象
 3. HRegion中的StoreFile过大时进行Split操作生成两个新的Regions，父Region下线，新的Regions被HM分到HRegionServer中
 
+HRS和HClient建立连接之后，HRS会创建对应的HRegion实例，HRegion会为每个表的HCF建立一个Store实例
+Store中包含一个HLog、一个MemStore和若干个StoreFile，StoreFile合并为大的SF再被拆分为Regions，被HM分发；
+MemStore是和HLog结合使用的，源自WAL的预习机制。日志没有写到WAL中时，HRS崩溃可以回滚到写日志之前；一旦写入WAL，数据就会写入内存MemStore中，检验MS大小，足够大的时候就作为StoreFile写入到硬盘
+
+![](https://uploadfiles.nowcoder.com/images/20190525/4206388_1558794527381_985F1362C55C9E5953811D171D935C3F)
+
 ## 元数据表 ##
 1. 用户表的Regions的元数据存储于.META.表中，随着Regions变多，记录Regions的元数据的.META.表也变大，因此.META.表也需要分裂成多个Regions。
 2. .META.的Regions的元数据又保存于-ROOT-表(不可再分，可以理解为只有一个Region)中，zookeeper记录-ROOT-表的位置
@@ -44,14 +97,25 @@ BigTable基于GFS实现，HBase基于HDFS实现
 1. 客户端访问Regions之前会先查看本地的缓存。缓存包括-ROOT-、.META.表和Regions的位置信息。
 2. 没有缓存就询问有Regions元数据的.META.表所在的HRegionServer
 3. .META.表也没查到就找有.META.表元数据Region的-ROOT-表，从而找到.META.继而找到Regions
-4. 若前面的信息全部失效就通过zookeeper重新定位-ROOT-、.META.表以及Regions的位置信息。此时需要进行6次网络来回才能定位到Regions
+4. 若前面的信息全部**失效**就通过zookeeper重新定位-ROOT-、.META.表以及Regions的位置信息。此时需要进行6次网络来回才能定位到Regions(信息为空的时候，需要3次缓存更新；信息失效会先需要3次网络来回，验证信息确实失效，然后再有3次更新信息缓存，3+3=6)
 
 
 ![](https://uploadfiles.nowcoder.com/images/20190524/4206388_1558706472244_73AC7C87A9A6D2EB3C6C3DEB988F62B4)
 
+## HBase索引 ##
+行转列列转行即可√
+对于经常查询的Qualifier，将限定符的取值范围作为rowkey，而原来的行键作为列构建新的表，即可实现根据列值快速定位数据所在行，即索引。
+索引表只包含一个列
 
 ## zookeeper ##
+分布式协作服务
 1. 用来存储-ROOT-表的地址、HMaster的地址和HRegionServer的地址
 2. HM通过ZK感知HRS的状态
 3. HBase中可以启动多个HMaster，但是ZK的选举机制保证集群中只有一个HM为当前集群的master
 4. 当HM出现单点故障，会立即选出一个新HM的作为master
+
+## Sqoop ##
+关系数据ETL工具，HDFS<->关系数据库
+
+## Flume ##
+日志收集工具
