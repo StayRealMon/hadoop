@@ -99,3 +99,21 @@ AS()中的数据是处理后的数据，对应insert新表的fields
 > 
 > Java编写普通的UDF，需要(1)用hadoop.io.*包，继承hadoop.hive.ql.exec.UDF，并且实现evaluate方法(可以实现多个，但是方法名不变，参数可以不同)(2)打成jar包，上传到本地路径即可(3)hive CLI窗口ADD JAR 'path/xx.jar';create temporary function FUN as 'jar包方法名';(4)select FUN(x,y) from table;
 > Java编写UDAF，需要(1)用hadoop.io.*包，继承hadoop.hive.ql.exec.UDAF，并且实现UDAFEvaluator接口(2)UDAFEvaluator下有5个方法：init()用于对中间结果进行初始化；iterate()接收传入的参数，进行迭代计算，返回值为boolean，需要计算的数据入口，类型为IntWritable或者TextWritable等可以序列化的类型；terminatePartial()没有参数，返回iterate中迭代后的数据；merge()接收terminatePartial的结果并合并中间值，返回值为boolean；teminate()返回最终的结果
+
+## order by & sort by & distribute by ##
+### order by ###
+> order by 会对数据进行全局排序,和oracle和mysql等数据库中的order by 效果一样，
+> 它只在一个reduce中进行所以数据量特别大的时候效率非常低。
+> 而且当设置 ：set hive.mapred.mode=strict的时候不指定limit，执行select会报错，如下：
+> LIMIT must also be specified.
+
+
+### sort by ###
+> sort by 是单独在各自的reduce中进行排序，所以并不能保证全局有序，一般和distribute by 一起执行，而且distribute by 要写在sort by前面
+> 如果mapred.reduce.tasks=1和order by效果一样，如果大于1会分成几个文件输出每个文件会按照指定的字段排序，而不保证全局有序。
+> sort by 不受 hive.mapred.mode 是否为strict ,nostrict 的影响
+
+
+### distribute by ###
+> 用distribute by 会对指定的字段按照hashCode值对reduce的个数取模，然后将任务分配到对应的reduce中去执行
+> 就是在mapreduce程序中的patition分区过程，默认根据指定key.hashCode()&Integer.MAX_VALUE%numReduce 确定处理该任务的reduce
