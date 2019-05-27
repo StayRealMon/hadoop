@@ -121,6 +121,23 @@ HLog的Value是HBase的KeyValue对象，对应HFile中的KeyValue
 3. HBase中可以启动多个HMaster，但是ZK的选举机制保证集群中只有一个HM为当前集群的master
 4. 当HM出现单点故障，会立即选出一个新HM的作为master
 
+### HA配置 ###
+
+> 解压安装，加环境变量
+> 
+> /conf/zoo.cfg 指定datadir目录
+> 
+> server.1(serverid)=192.168.213.141:2888(有leader):3888(无主选leader用)
+> 
+> server.2=192.168.213.142:2888:3888
+> leader(单点)&follower(推选)：优先事务id，次要serverid
+> 
+> datadir下加myid文件  追加serverid
+
+hadoop在HA模式下secNameNode就没用了
+hdfs-site.xml 逻辑物理映射，ZKFC
+core.site.xml 逻辑名称为定义的字符串名称，zookeeper列表
+
 ## Sqoop ##
 关系数据ETL工具，HDFS<->关系数据库
 

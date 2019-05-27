@@ -66,6 +66,31 @@ Data Node作用：①对本节点进行管理②提交自己保存的Block列表
 > 
 > disk负责保存实际的Block，以及描述Block的元数据信息(一个md5校验小文件)
 
+## 高可用(HA)和联邦(Federation) ##
+要解决的问题
+1. 单点故障-HA主NN挂掉，切换到备份的NN
+2. 没有故障但是内存受限-F所有的NN共享所有的DN资源
+
+### HA ###
+1. 来自于DN汇报的信息可以在两台NN中保持一致
+2. 但是来自于Client的请求操作日志只和工作的一台NN进行连接，有可能会因为可用性导致不一致性
+3. 可以利用Linux的**NFS**网络文件系统保持日志文件的一致性
+4. 也可以加若干个**JN**专门存储操作日志，供两个NN同步
+5. ZKFC(DFSZKFailoverController)是一个JVM进程，一边监控NN的健康状态，和NN之间没有网络I/O，属于同一个节点；ZKFC另一边**去ZK某一树目录下抢一个锁**创建一个节点，抢到锁的NN变为actived，其余的standby
+6. 所有的standby向ZK进行注册，actived失败的时候，ZKFC删掉节点，**删除事件触发注册方法**，再次进行争抢锁
+7. 若actived节点没有失败，但是JVM进程ZKFC断了，ZK的**session机制**，连接失败超时的时候删掉目录下的节点供再次争抢，原actived降为standby，抢到锁的升级actived
+
+> 逻辑集群到物理集群的映射
+> journalNode的位置信息描述配置
+> 故障切换的代理方法和免密钥配置
+> 
+> 同一个物理cluster集群，要先启动journalNode，然后format集群NN1，接着启动需要format的NN2，此时处于standby状态，NN2会同步已经格式化的所有DN信息
+
+### Federation ###
+1. 一个集群有两个或者多个NN处于actived状态，但是两个NN获得到的DN汇报的block信息是不一样的，即**两个NN维护的目录树是不一样的**，虽然cluster是同一个，但是NN是隔离的，不能互相访问对方的数据。若第三方想要获取两个NN的目录树结构，得到cluster所有数据
+
+> 先启动journalnode，format第一个NN，启动ZK，format ZK，(最后启动另一个NN?)
+
 ## Block的副本放置策略 ##
 1. 第一块副本放在上传文件的DN，磁盘不太满，CPU不太忙的节点
 2. 和第一个副本放在不同机架的节点上
