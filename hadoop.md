@@ -80,11 +80,18 @@ Data Node作用：①对本节点进行管理②提交自己保存的Block列表
 6. 所有的standby向ZK进行注册，actived失败的时候，ZKFC删掉节点，**删除事件触发注册方法**，再次进行争抢锁
 7. 若actived节点没有失败，但是JVM进程ZKFC断了，ZK的**session机制**，连接失败超时的时候删掉目录下的节点供再次争抢，原actived降为standby，抢到锁的升级actived
 
-> 逻辑集群到物理集群的映射
-> journalNode的位置信息描述配置
-> 故障切换的代理方法和免密钥配置
-> 
-> 同一个物理cluster集群，要先启动journalNode，然后format集群NN1，接着启动需要format的NN2，此时处于standby状态，NN2会同步已经格式化的所有DN信息
+> 逻辑集群到物理集群的**映射**
+> **journalNode的位置信息**描述配置
+> 故障切换的**代理方法**和免密钥配置
+
+1.  同一个物理cluster集群，要先启动**journalNode**(供新的HA集群NN1格式化的edit_log和fsimage存新的集群日志)
+2.  然后**format**NN1(日志信息保存到JNN)
+3.  **启动zookeeper的节点**，进行**格式化**，用于ZKFC进行锁的争抢
+> hdfs zkfc -formatZK
+
+4.  接着**启动**NN2，但是不需要format，会根据，此时处于standby状态，NN2会同步已经格式化的所有DN信息
+
+![](https://uploadfiles.nowcoder.com/images/20190528/4206388_1559033761726_4B1CE8F90F401D0BCCC4DBEE05440DB3)
 
 ### Federation ###
 1. 一个集群有两个或者多个NN处于actived状态，但是两个NN获得到的DN汇报的block信息是不一样的，即**两个NN维护的目录树是不一样的**，虽然cluster是同一个，但是NN是隔离的，不能互相访问对方的数据。若第三方想要获取两个NN的目录树结构，得到cluster所有数据

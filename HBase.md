@@ -136,7 +136,7 @@ HLog的Value是HBase的KeyValue对象，对应HFile中的KeyValue
 
 hadoop在HA模式下secNameNode就没用了
 hdfs-site.xml 逻辑物理映射，ZKFC
-core.site.xml 逻辑名称为定义的字符串名称，zookeeper列表
+core-site.xml 逻辑名称为定义的字符串名称，zookeeper列表
 
 ## Sqoop ##
 关系数据ETL工具，HDFS<->关系数据库
