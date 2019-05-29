@@ -85,9 +85,14 @@ Data Node作用：①对本节点进行管理②提交自己保存的Block列表
 > 故障切换的**代理方法**和免密钥配置
 
 1.  同一个物理cluster集群，要先启动**journalNode**(供新的HA集群NN1格式化的edit_log和fsimage存新的集群日志)
+
+		hadoop-daemon.sh start journalnode
+
 2.  然后**format**NN1(日志信息保存到JNN)
+
+		hdfs namenode -format
 3.  **启动zookeeper的节点**，进行**格式化**，用于ZKFC进行锁的争抢
-> hdfs zkfc -formatZK
+		hdfs zkfc -formatZK
 
 4.  接着**启动**NN2，但是不需要format，会根据，此时处于standby状态，NN2会同步已经格式化的所有DN信息
 

@@ -134,6 +134,9 @@ HLog的Value是HBase的KeyValue对象，对应HFile中的KeyValue
 > 
 > datadir下加myid文件  追加serverid
 
+![](https://uploadfiles.nowcoder.com/images/20190529/4206388_1559142686932_2D58A1A8ECC9672B25A230C50E0F8963)
+
+
 hadoop在HA模式下secNameNode就没用了
 hdfs-site.xml 逻辑物理映射，ZKFC
 core-site.xml 逻辑名称为定义的字符串名称，zookeeper列表
