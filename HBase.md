@@ -20,40 +20,42 @@
 6. 不必先定义可随时插入新的限定符
 
 ## HBase数据模型 ##
-rowkey/timestamp/CF1(列族)/CF2/CF3
-定义表的时候需要声明列族，列是在插入数据的时候声明
-版本由timestamp决定是高或低，低版本的记录不会被删掉，合并的时候会被删除；版本覆盖解决数据更新的问题，保留多版本号，可以查询到历史
-CF2:q1 = val1 由rowkey+cf+q1即可确定到一个cell数据
+1. rowkey/timestamp/CF1(列族)/CF2/CF3
+2. 定义表的时候需要声明列族，列是在插入数据的时候声明
+3. 版本由timestamp决定是高或低，低版本的记录不会被删掉，合并的时候会被删除；版本覆盖解决数据更新的问题，保留多版本号，可以查询到历史
+4. CF2:q1 = val1 由rowkey+cf+q1即可确定到一个cell数据
 
 ### rowkey ###
-决定一行记录/按照字典序排序/只能存储64k的字节数据
-rowkey的设计很关键，对实时查询
-设计的时候一般会加“业务字段”+“时间戳”，先按照业务字段排序，再按照时间戳排序
-若最新的时间排在上面，就拿MAX-time，最新时间就排在靠前
+1. 决定一行记录/按照字典序排序/只能存储64k的字节数据
+2. rowkey的设计很关键，对实时查询
+3. 设计的时候一般会加“业务字段”+“时间戳”，先按照业务字段排序，再按照时间戳排序
+4. 若最新的时间排在上面，就拿MAX-time，最新时间就排在靠前
 
 ### ColumnFamily列族&Qualifier限定符 ###
-CF是处理的最小单位，处理的时候可以没有列，但是一定要有CF。定义表模式(Table Schema)的时候必须预先指出CF的定义。如create ‘test’, 'course'
-每个q都归属于某一个CF，且可以动态按需在CF下加入新的q。CF下的列成员表示方法为course:math,course:english
-权限控制、存储和调优都是在CF的层面进行的
+1. CF是处理的最小单位，处理的时候可以没有列，但是一定要有CF。定义表模式(Table Schema)的时候必须预先指出CF的定义。如create ‘test’, 'course'
+2. 每个q都归属于某一个CF，且可以动态按需在CF下加入新的q。CF下的列成员表示方法为
+	
+		course:math,course:english
+3. 权限控制、存储和调优都是在CF的层面进行的
 同一CF下的数据存储在同意目录下，由几个文件保存
 
 ### timestamp 时间戳(版本号)###
-版本控制，区别cell下的数据版本。按照时间倒序排列，最新的在最前
+1. 版本控制，区别cell下的数据版本。按照时间倒序排列，最新的在最前
 64位整型数据
 
 ### cell ###
-行列坐标交叉决定。有版本区分，即保存着不同版本的数据。
-cell中是未解析的**字节数组**，以字节码的形式存储，不需要数据类型定义。
-唯一确定：{rowkey,column(<cf>+<q>,version)} => cell
+1. 行列坐标交叉决定。有版本区分，即保存着不同版本的数据。
+2. cell中是未解析的**字节数组**，以字节码的形式存储，不需要数据类型定义。
+3. 唯一确定：{rowkey,column(<cf>+<q>,version)} => cell
 
 ### HLog ###
-普通的Hadoop Sequence File。有**操作日志**和操作的**数据信息**。
-HLog的Key是HLogKey对象，其中记录了写入数据的归属信息，包括table和region的名字，还有sequence number和timestamp
-HLog的Value是HBase的KeyValue对象，对应HFile中的KeyValue
+1. 普通的Hadoop Sequence File。有**操作日志**和操作的**数据信息**。
+2. HLog的Key是HLogKey对象，其中记录了写入数据的归属信息，包括table和region的名字，还有sequence number和timestamp
+3. HLog的Value是HBase的KeyValue对象，对应HFile中的KeyValue
 
 ### 物理模型 ###
-物理模型实际上，把概念模型中的一个行分割，并按照列进行存储。其中空值不会被存储，未指明时间戳就返回最新的版本。
-按照rowkey进行分割，按照CF进行存储
+1. 物理模型实际上，把概念模型中的一个行分割，并按照列进行存储。其中空值不会被存储，未指明时间戳就返回最新的版本。
+2. 按照rowkey进行分割，按照CF进行存储
 
 ## Region ##
 1. HBase分布式存储和负载均衡的最小单位。可以是Table划分出来的Region，也可以是.META.表划分出来的Region。
@@ -107,9 +109,9 @@ HLog的Value是HBase的KeyValue对象，对应HFile中的KeyValue
 ![](https://uploadfiles.nowcoder.com/images/20190524/4206388_1558706472244_73AC7C87A9A6D2EB3C6C3DEB988F62B4)
 
 ## HBase索引 ##
-行转列列转行即可√
-对于经常查询的Qualifier，将限定符的取值范围作为rowkey，而原来的行键作为列构建新的表，即可实现根据列值快速定位数据所在行，即索引。
-索引表只包含一个列
+1. 行转列列转行即可√
+2. 对于经常查询的Qualifier，将限定符的取值范围作为rowkey，而原来的行键作为列构建新的表，即可实现根据列值快速定位数据所在行，即索引。
+3. 索引表只包含一个列
 
 ## HClient ##
 访问HBase的接口，维护cache加快对HBase的访问
@@ -139,7 +141,7 @@ HLog的Value是HBase的KeyValue对象，对应HFile中的KeyValue
 
 hadoop在HA模式下secNameNode就没用了
 hdfs-site.xml 逻辑物理映射，ZKFC
-core-site.xml 逻辑名称为定义的字符串名称，zookeeper列表
+core-site.xml 逻辑名称为定义的字符串名称，zookeeper列表zoo.cfg & myid
 
 ## Sqoop ##
 关系数据ETL工具，HDFS<->关系数据库
