@@ -27,3 +27,8 @@ mysql -u root -p (root)
 18. cat ad_operation.dat |head -n 30 | tail -n -20 前20行的后10行，即10-30
 19. cat ad_operation.dat |tail -n +10 | head -n 20 10行开始显示20行，即10-30
 20. sed -n '10,30p' user_data 直接查看10-30行
+
+
+## 文件权限 ##
+按1/3/3/3分，即-/rwx/r--/r--，分别为**文件类型**、**文件属主**、**文件属组**和**其他用户**的对应权限。
+ 第一段为文件类型：-为常规文件，d为目录，l为符号链接等。 其中rwx分别为read可读、write可写和可执行executable
