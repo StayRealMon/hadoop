@@ -293,3 +293,10 @@ AM以作业为单位，负载到不同的节点进行作业调度，避免单点
 	    }
 	
 	}
+
+
+## 面试问题 ##
+### 超级大表join超级大表 ###
+
+> 利用hash，将原表变为partition0-9，原来的id = id就变为id = id & partitionX = partitionX，便于分布式计算
+
