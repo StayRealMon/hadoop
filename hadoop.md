@@ -91,17 +91,29 @@ Data Node作用：①对本节点进行管理②提交自己保存的Block列表
 2.  然后**format**NN1(日志信息保存到JNN)
 
 		hdfs namenode -format
-3.  **启动zookeeper的节点**，进行**格式化**，用于ZKFC进行锁的争抢
+3.  接着**standby启动**NN2，但是不需要format，会根据NN1存于JournalNode的日志信息进行同步，此时处于standby状态，NN2会同步已经格式化的所有DN信息(同步完之后不会启动而是立即shutdown，启动需要在NN1执行start-dfs.sh命令，和DN一起启动)
+
+		hdfs namenode --help(-bootstrapStandby)
+
+4. 若是首次安装ZK集群，需要先**启动zookeeper的节点**，进行**格式化**，建立空的目录树，用于ZKFC进行锁的争抢(若已经进行过格式化则跳过此步骤，直接执行start-dfs.sh命令启动集群即可)
 		hdfs zkfc -formatZK
 
-4.  接着**启动**NN2，但是不需要format，会根据，此时处于standby状态，NN2会同步已经格式化的所有DN信息
+> 先启动JNs，供NN1格式化，存储最新的日志
+> 格式化NN1，新的日志保存到JNs
+> NN2以standby启动，同步日志后shutdown
+> 初始化/启动ZK集群hdfs zkfc -fromatZK/zkServer.sh start，有QuorumPeerMain进程有leader有follower
+> >(1)先启动JournalNode，再启动Hdfs，NameNode可以启动并可以正常运行
+> (2)使用start-dfs.sh启动，众多服务都启动了，隔两分钟NameNode会退出，再次hadoop-daemon.sh start namenode单独启动可以成功稳定运行NameNode
+> 原因：在执行start-dfs.sh命令之后NN正常启动后又shutdown，原因是journalnode没有准备好。NN尝试使用ipc和JN连接进行更新日志，但是集群刚刚启动JN还没有准备好，NN已经尝试了很多次都没连接上，导致NN挂掉。
+> Solution1集群启动后再次手动启动NN之后即可保持长时间稳定
+> Solution2也可以设置core-site.xml，延长NN和JN的尝试时间(ipc.client.connect.retry.interval)，增加尝试次数(ipc.client.connect.max.retries)
 
 ![](https://uploadfiles.nowcoder.com/images/20190528/4206388_1559033761726_4B1CE8F90F401D0BCCC4DBEE05440DB3)
 
 ### Federation ###
 1. 一个集群有两个或者多个NN处于actived状态，但是两个NN获得到的DN汇报的block信息是不一样的，即**两个NN维护的目录树是不一样的**，虽然cluster是同一个，但是NN是隔离的，不能互相访问对方的数据。若第三方想要获取两个NN的目录树结构，得到cluster所有数据
 
-> 先启动journalnode，format第一个NN，启动ZK，format ZK，(最后启动另一个NN?)
+> 先启动journalnode，format第一个NN，启动ZK，format ZK，最后启动整个集群
 
 ## Block的副本放置策略 ##
 1. 第一块副本放在上传文件的DN，磁盘不太满，CPU不太忙的节点
