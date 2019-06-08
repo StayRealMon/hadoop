@@ -1,3 +1,12 @@
+## 分组排名 ##
+> 求每个班级的前两名
+
+	select sid from 
+		(select count(sc1.SId) as cout, sc1.SId as sid from yuewen_sc as sc1 join yuewen_sc as sc2
+		on sc1.class = sc2.class and sc1.Score>sc2.Score
+		group by sc.SId) as tmp
+	where cout>1; 
+
 # SQL × 50 #
 1. Student(<u>**SId**</u>,Sname,Sage,Ssex)
 SId 学生编号,Sname 学生姓名,Sage 出生年月,Ssex 学生性别
