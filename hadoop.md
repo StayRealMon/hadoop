@@ -138,14 +138,23 @@ Data Node作用：①对本节点进行管理②提交自己保存的Block列表
 ![](https://uploadfiles.nowcoder.com/images/20190503/4206388_1556867353821_2647913E15809B327E3669CC22982D66)
 ## MapReduce ##
 **Input HDFS**
+
 **->Block split**(切片，窗口机制，源文件变成< K, V>)
+
 **->Map**(将< K, V>转化为< K, V, Partition >)
+
 **->sort**(内部有序外部无序，根据Map生成的< K, V, P >中的K和P进行排序；排序前的< K, V, P >没有写入disk，而是在内存中的buffer缓冲区；排序结束后生成的文件按照Partition写入本地磁盘，供reduce节点拉去)
+
 **->combiner**(局部reduce，减少实际reduce的时间)
+
 **->shuffle**(默认Hash映射，注意要减少节点之间的I/O)
+
 **->partition**(将相同的Key拉到同一个分区，便于下一步reduce计算)
+
 **->merge**(依赖于Map作业的sort输出，这一步只是归并排序)
+
 **->reduce**(将< K, V >转化为最终的< K, V, Partition >)
+
 **->Output HDFS part00000**
 
 > 默认一个Split为一个Block，即Block = Split。
