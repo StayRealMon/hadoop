@@ -482,3 +482,49 @@ where子句查询的时候按照建立索引的顺序查询，否则会导致索
     //自带函数
     SELECT Customer,SUM(OrderPrice) FROM Orders GROUP BY Customer HAVING SUM(OrderPrice)<2000
     SELECT ProductName, UnitPrice, FORMAT(Now(),'YYYY-MM-DD') as PerDate FROM Products
+
+
+## PostgreSQL ##
+1. **特点：**跨平台；支持文本图像声音；多种编程接口；支持SQL多种功能子查询、外键、视图、多进程并发控制(MVCC)、异步复制等
+2. 在PostgreSQL中，表可以设置为从“父”表继承其特征
+3. PostgreSQL是第一个实现多版本并发控制（MVCC）功能的数据库管理系统，甚至在Oracle之前。MVCC功能在Oracle中称为快照隔离。
+4. PostgreSQL是一个通用的对象 - 关系数据库管理系统。它允许您添加使用不同编程语言（如C / C ++，Java等）开发的自定义函数。
+5. PostgreSQL旨在实现可扩展性。在PostgreSQL中，您可以定义自己的数据类型，索引类型，函数语言等。如果您不喜欢系统的任何部分，您可以随时开发自定义插件以增强它以满足您的要求，例如，添加新的优化。
+
+### DATA Types ###
+
+1. **Boolean**
+2. **Character** types such as char(n), varchar(n), and text.
+3. **Numeric** types such as integer and floating-point number.
+4. **Temporal** types such as date, time, timestamp, and interval
+5. **UUID** for storing Universally Unique Identifiers
+6. **Array** for storing array strings, numbers, etc.
+7. **JSON** stores JSON data
+8. **hstore** stores key-value pair
+9. **Special types** such as network address and geometric data.
+
+> SMALLINT→(-32,768 to 32,767)；INT→(-2,147,483,648 to 2,147,483,647)；float(n)；numeric(p,s)
+> DATE&TIME&TIMESTAMP&TIMESTAMPTZ(有时区)&INTERVAL(一段时间)
+> JSONB二进制存储处理快插入慢，支持indexing
+> UUID(Universal Unique Identifiers defined)国际化？URL脱敏？
+> Special:box(a rectangular box)line(point set)point(a geometric pair of numbers)lseg(line segment)polygon(closed geometric)inet(IP4 address)macaddr(MAC address)
+
+## PostgreSQL基本操作说明 ##
+### 登陆 ###
+跳板机+psql：psql [选项]... [数据库名称 [用户名称]]
+
+	psql -h(ost) 10.111.50.54 -p(ort) 3438 -d(bname) tian -U(ser) tian
+
+### 操作 ###
+	//创建删除
+	create/drop database tian;
+	//查看、选择、退出数据库
+	psql=# \l
+	psql=# \c
+	psql=# \q
+	//查看表结构、大小
+	psql=# \d + table_name
+	psql=# \dt + table_name
+	psql=# \timing	//timing模式下查看sql执行时间
+	psql=# \x			//x模式下查看扩展模式显示查询结果
+	psql=# \o file_name.csv	//导出文件
