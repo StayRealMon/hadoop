@@ -323,8 +323,8 @@ AM以作业为单位，负载到不同的节点进行作业调度，避免单点
 
 
 ## Hello ##
-NoSQL-HBase/Redis
-OLAP-Kylin/Apache Druid/Click House
-实时计算框架-Flink/Spark/Storm/Kafka Streaming
-数仓-Hive/数仓建模/实时数仓
-消息日志传输-LogStash/Filebeat/ElasticResearch/Flume/Kafka/Pulsar
+1. NoSQL-HBase/Redis
+2. OLAP-Kylin/Apache Druid/Click House
+3. 实时计算框架-Flink/Spark/Storm/Kafka Streaming
+4. 数仓-Hive/数仓建模/实时数仓
+5. 消息日志传输-LogStash/Filebeat/ElasticResearch/Flume/Kafka/Pulsar
