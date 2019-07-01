@@ -132,3 +132,12 @@ AS()中的数据是处理后的数据，对应insert新表的fields
 ### distribute by ###
 > 用distribute by 会对指定的字段按照hashCode值对reduce的个数取模，然后将任务分配到对应的reduce中去执行
 > 就是在mapreduce程序中的patition分区过程，默认根据指定key.hashCode()&Integer.MAX_VALUE%numReduce 确定处理该任务的reduce
+
+
+## Question ##
+### 0628 ###
+数据抽取的时候要把pg表中的数据格式转化为hive中的格式，先保存至stg层，然后再按照密级进行加密处理后保存至ods层
+问题1：stg层的数据表结构出现错误，修改表结构后原先分区中的表结构如何修改？(cascade/修改hive存在mysql中的表元数据)修改过后历史分区中的数据格式是否会自动转变？[解决方案1](https://blog.csdn.net/mbshqqb/article/details/70408186)
+[解决方案2](https://bupt04406.iteye.com/blog/1560796)
+ 
+问题2：stg层的数据如何进行处理通过保存到ods层？

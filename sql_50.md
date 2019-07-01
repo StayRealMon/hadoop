@@ -296,3 +296,12 @@ SELECT IFNULL("00","11");	res-> 00
 **NULLIF(expr1,expr2)**：如果两个参数相等则返回NULL，否则返回第一个参数的值expr1
 select nullif(1,1)	res->null
 selectnullif(123,321);res->123
+
+## Row_number() ##
+Row_number() over ((partition by col1) order by col2 (asc/desc)) as rank
+先根据col1对表进行分组，再根据col2进行分组排序，返回排序编号
+如 
+
+	Row_number(partition by dept order by salary desc ) as rank
+
+返回按照部门中的工资进行降序排序的排名
