@@ -110,6 +110,12 @@ Data Node作用：①对本节点进行管理②提交自己保存的Block列表
 
 ![](https://uploadfiles.nowcoder.com/images/20190528/4206388_1559033761726_4B1CE8F90F401D0BCCC4DBEE05440DB3)
 
+### HA模式启动 ###
+1. zkServer.sh start ZK进程启动，journalnode没问题
+2. NN1节点启动start-dfs.sh，集群启动没问题
+3. NN2节点hadoop-daemon.sh start namenode 单独启动standby
+![](https://uploadfiles.nowcoder.com/images/20190630/4206388_1561901039117_B850DAAACB6A96B16D8C4F8DE4CE5651)
+
 ### Federation ###
 1. 一个集群有两个或者多个NN处于actived状态，但是两个NN获得到的DN汇报的block信息是不一样的，即**两个NN维护的目录树是不一样的**，虽然cluster是同一个，但是NN是隔离的，不能互相访问对方的数据。若第三方想要获取两个NN的目录树结构，得到cluster所有数据
 
