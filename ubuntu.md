@@ -32,3 +32,13 @@ mysql -u root -p (root)
 ## 文件权限 ##
 按1/3/3/3分，即-/rwx/r--/r--，分别为**文件类型**、**文件属主**、**文件属组**和**其他用户**的对应权限。
  第一段为文件类型：-为常规文件，d为目录，l为符号链接等。 其中rwx分别为read可读、write可写和可执行executable
+
+
+## ubuntu Server ##
+1. VM虚拟机网络桥接模式设定
+2. 更新apt-get sudo apt-get update/install vim
+3. 查看ip和网关 ifconfig/netstat -rn/route -n
+4. 配置静态ip vim /etc/networks/interfaces
+①dhcp-static②address 192.168.31.131③netmask 255.255.255.0④gateway 192.168.31.2⑤dns-nameservers 192.168.213.2
+5. 重启生效 sudo /etc/init.d/networking restart
+6. 测试外网 ping www.baidu.com
