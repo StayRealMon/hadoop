@@ -17,6 +17,38 @@
 	lines terminated by '\n'
 	null defined as '?'
 	[location 'hdfs_path'];
+
+
+	//建立分区
+	USE power_bike;
+	DROP TABLE IF EXISTS t_ev_ride_appraise;
+	CREATE EXTERNAL TABLE t_ev_ride_appraise
+	(
+	 guid      string      comment '唯一标识',
+	 user_id      bigint      comment '用户GUID',
+	 mobile_phone      string      comment '用户手机号',
+	 order_id      string      comment '订单唯一编号',
+	 ride_time      bigint      comment '骑行时长',
+	 ride_distance      bigint      comment '骑行距离',
+	 bike_no      string      comment '本次骑行车辆编号',
+	 city_name      string      comment '城市名称',
+	 appraise_type      bigint      comment '评价类型（1.好评，2.差评)',
+	 tag_info      string      comment '评价标签类型 json array结构',
+	 appraise_content      string      comment '评价内容',
+	 create_time      string      comment '记录创建时间',
+	 update_time      string      comment '记录更新时间'
+	)COMMENT '骑行评价'
+	PARTITIONED BY(pt string comment 'increment_partition')
+	ROW FORMAT DELIMITED FIELDS TERMINATED BY '\001'
+	COLLECTION ITEMS TERMINATED BY '\002'
+	LINES TERMINATED BY '\n'
+	STORED AS TEXTFILE
+	LOCATION '/user/data/hello_0702';	
+	LOAD DATA INPATH '/tmp/fake_data.txt' INTO TABLE t_ev_ride_appraise PARTITION(pt='20190702');
+> Location:               hdfs://master:9000/user/data/hello_0702
+> Table Type:             EXTERNAL_TABLE
+
+
 ### 内外部表 ###
 外部表create的时候最后加上指定路径，删除的时候只删除数据库的结构，不删除元数据
 
