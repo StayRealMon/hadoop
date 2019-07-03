@@ -171,6 +171,16 @@ AS()中的数据是处理后的数据，对应insert新表的fields
 数据抽取的时候要把pg表中的数据格式转化为hive中的格式，先保存至stg层，然后再按照密级进行加密处理后保存至ods层
 1. 问题1：stg层的数据表结构出现错误，修改表结构后原先分区中的表结构如何修改？(cascade/修改hive存在mysql中的表元数据)修改过后历史分区中的数据格式是否会自动转变？[解决方案1](https://blog.csdn.net/mbshqqb/article/details/70408186)
 [解决方案2](https://bupt04406.iteye.com/blog/1560796)
+
+直接修改得时候会报错
+	
+	FAILED: Execution Error, return code 1 from org.apache.hadoop.hive.ql.exec.DDLTask. Unable to alter table. The following columns have types incompatible with the existing columns in their respective positions :
+
+可以在CLI中将参数修改，这样可以强制修改字段类型忽略可能产生的问题
+
+	set hive.metastore.disallow.incompatible.col.type.changes=false;
+读检查的时候显示不出来的数据会显示null
+
  
 2. 问题2：stg层的数据如何进行处理通过保存到ods层？即跨数据库建表+字段脱敏
 
