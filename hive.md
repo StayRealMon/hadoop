@@ -193,3 +193,19 @@ AS()中的数据是处理后的数据，对应insert新表的fields
 ### 0701 ###
 1. ods层中的增量数据表比pg层原始数据表要晚，有时候会将历史分区全部读取到第一个分区，有时候只读前一个月数据，丢失了历史数据。如何判定？(查询的时候一定先show partitions table_name，再在partition中操作查找)
 2. pg源表和ods表差异：缺表/缺字段/类型不一致/comment不完整，整理出excel，想想怎么改
+
+### 0705 idata接口开发总结 ###
+1. 需求：产品要求查询接口，需要获取pg所有库的信息，和每个pg库下所有的表名字和中文注释
+2. 现有的ods.file_pg_meta数据不完整(有其他用途，冗余较大)，因此选择再重新创建一张表ods.file_pg_table_meta，专门用于这个接口查询
+3. 开发流程：数据源来自于pg业务库，需要抽取所需信息到hive中，再抽取到pg接口库，用于idata接口开发
+4. 葛大爷先在hive ods层中建好table_meta表，我在ide环境中(数仓权限)复制葛大爷的历史任务(和pg%meta表有关)，将39个pg库名和其下的表名从pg业务库中的系统表抽取到出来到table_meta中，同时要复制start和end任务，建立数据抽取前后置任务的血缘关系，每天09:06 - 09:15执行此项任务树，保证数据更新一致
+
+
+	SELECT pu.usename as user_name, pc.relname AS table_code, coalesce(obj_description(relfilenode,'pg_class'), ' ') AS table_name from pg_user pu  join pg_class pc on pu.usesysid = pc.relowner where pc.relkind = 'r' and pc.relchecks = 0 and pu.usename not in ('postgres') and \\$CONDITIONS
+
+5. data cloud环境下确认pg的库都已经成功导入到table_meta表中，就把上面的任务树部署上线；接着在葛大爷的数据开发权限下添加新的任务，目的是将table_meta表中的数据再同步到线上dev3环境pg接口库，葛大爷建好表，psql连接，查询表结构，然后from ods层中的table_meta select所需字段到bike_report库下的table_meta中
+
+
+	select concat(user_name,'_',table_name) as table_id, db as db_name,user_name,table_name,table_comment from ods.file_pg_table_meta where db = user_name
+
+6. 最后一步就是从bike_report库下的table_meta表中提取数据做成idata接口提供给产品交付就好了。选数据源定参数，查表查字段定维度，生成sql语句测试成功最后上线交付ok√
