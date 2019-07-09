@@ -209,3 +209,6 @@ AS()中的数据是处理后的数据，对应insert新表的fields
 	select concat(user_name,'_',table_name) as table_id, db as db_name,user_name,table_name,table_comment from ods.file_pg_table_meta where db = user_name
 
 6. 最后一步就是从bike_report库下的table_meta表中提取数据做成idata接口提供给产品交付就好了。选数据源定参数，查表查字段定维度，生成sql语句测试成功最后上线交付ok√
+
+## 0708 ##
+葛大爷给了三个文档，目的是要做UDF(UDF需要一进一出，UDAF支持多进一出)，把js代码以java实现，作用是把一个输入的GeoArea对象进行扩充或者缩减，得到一块新的GeoArea，需要继承UDF并且实现evaluate函数
