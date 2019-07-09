@@ -42,3 +42,22 @@ mysql -u root -p (root)
 ①dhcp-static②address 192.168.31.131③netmask 255.255.255.0④gateway 192.168.31.2⑤dns-nameservers 192.168.213.2
 5. 重启生效 sudo /etc/init.d/networking restart
 6. 测试外网 ping www.baidu.com
+7. 用户权限和密码设置sudo passwd -u root查看用户root是否设置密码；sudo passwd root给root设置密码
+8. 安装postgresql sudo agt-get install postgresql  (自带了一个用户postgres，在这个用户下创建用户createuser --interavtive，创建数据库createdb -e hello，进入psql命令模式查看用户和库和表\du \l \d)
+
+
+## 压缩包 ##
+
+		tar -cf all.tar *.gif		//c产生新的包；f指定文件名
+		tar -rf all.tar *.jpg		//r增加文件到all.tar
+		tar -tf all.tar			//t列出tar包下所有文件
+		tar -xf all.tar			//x解压tar包
+
+		tar -zxf all.tar.gz		//z调用gzip解压.gz压缩包
+		tar -jxf all.tar.bz2		//j调用bzip2解压.bz2压缩包
+		tar -Zxf all.tar.Z		//Z调用compress解压.Z压缩包
+
+		zip all.zip *.jpg/unzip all.zip
+		gzip -d all.gz/gunzip all.gz
+		bzip -d all.bz2/bunzip all.bz2
+		uncompress all.Z
