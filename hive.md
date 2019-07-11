@@ -139,14 +139,33 @@ AS()中的数据是处理后的数据，对应insert新表的fields
 > 
 > Java编写普通的UDF，需要
 > 
-> (1)用hadoop.io.*包，继承hadoop.hive.ql.exec.UDF，并且实现evaluate方法(可以实现多个，但是方法名不变，参数可以不同)
+> (1)用hadoop.io.*包，继承hadoop.hive.ql.exec.UDF，并且实现evaluate方法(可以实现多个，但是方法名不变，参数可以不同)select的时候传的参数需要和UDF中实现的evaluate方法参数一致
 > 
 > (2)打成jar包，上传到本地路径即可
 > 
 > (3)hive CLI窗口ADD JAR 'path/xx.jar';create temporary function FUN as 'jar包方法名';
 > 
 > (4)select FUN(x,y) from table;
-> 
+
+
+	import org.apache.hadoop.hive.ql.exec.UDF;
+	import org.apache.hadoop.io.Text;
+	
+	public class CaseChange extends UDF {
+	    public Text evaluate(Text input){
+	        return new Text(input.toString().toLowerCase());
+	    }
+	    public Text evaluate(Text input, String type){
+	        if (type.equals("LOWWER"))
+	            return new Text(input.toString().toLowerCase());
+	        else if (type.equals("UPPER"))
+	            return new Text(input.toString().toUpperCase());
+	        else
+	            return null;
+	    }
+	}
+
+
 > Java编写UDAF，需要
 > 
 > (1)用hadoop.io.*包，继承hadoop.hive.ql.exec.UDAF，并且实现UDAFEvaluator接口
