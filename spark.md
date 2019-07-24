@@ -41,4 +41,12 @@ RDD的Lineage关系有向无环可以看作DAG但并不是
 ### Driver/Worker ###
 Driver发送task给Worker，Worker把result返回给Driver
 
-### Transformer/Actio ###
+### Transformer/Action ###
+Transformation算子懒加载，遇到Action的时候才触发，Action会一直往上找到最原始的RDD，才开始运行。可以考虑持久化RDD，否则每次都要从头加载RDD。
+
+持久化算子包括
+1. rdd.cache()将RDD存储在内存中，懒执行算子；
+2. rdd.persist()手动指定持久化级别disk/Memory/OffHeap(堆外内存Techyon)/Deserialized/replication[内存不够了再放磁盘]；
+3. checkpoint将数据存在磁盘中，切断rdd的lineage，application跑完之后persist持久化的数据被回收，而checkpoint会永久存储于disk供下一个app使用[先由action触发回溯到数据源，计算到被标记的rdd的时候，把rdd结果setCheckpoint到disk，切断lineage])
+
+持久化算子的最小单位都是partition。
