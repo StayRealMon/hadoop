@@ -1,3 +1,10 @@
+1. 线程、线程池、锁
+2. GC、JVM
+3. Stringbuilder、Stringbuffer
+4. List、ArrayList、HashMap
+5. final 关键字transient不可被序列化
+6. 子类父类虚函数
+7. 抽象函数interface
 > 重载，继承，多态，接口，虚函数，并发，线程
 
 ## 面向对象的基本原则 ##

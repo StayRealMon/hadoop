@@ -42,7 +42,7 @@ RDD的Lineage关系有向无环可以看作DAG但并不是
 Driver发送task给Worker，Worker把result返回给Driver
 
 ### Transformer/Action ###
-Transformation算子懒加载，遇到Action的时候才触发，Action会一直往上找到最原始的RDD，才开始运行。可以考虑持久化RDD，否则每次都要从头加载RDD。
+Transformation算子懒加载，遇到Action的时候才触发，Action会一直往上找到最原始的RDD，才开始运行。一个App中的action数量和运行中的job数量一致。可以考虑持久化RDD，否则每次都要从头加载RDD。
 
 持久化算子包括
 1. rdd.cache()将RDD存储在内存中，懒执行算子；
@@ -50,3 +50,14 @@ Transformation算子懒加载，遇到Action的时候才触发，Action会一直
 3. checkpoint将数据存在磁盘中，切断rdd的lineage，application跑完之后persist持久化的数据被回收，而checkpoint会永久存储于disk供下一个app使用[先由action触发回溯到数据源，计算到被标记的rdd的时候，把rdd结果setCheckpoint到disk，切断lineage])
 
 持久化算子的最小单位都是partition。
+
+Transformation(filter/map/flatmap/reduceByKey/sample)
+Action(foreach/count/collect)
+
+
+## Spark SQL ##
+1. Shark依赖于Hive，SparkSQL脱离了Hive限制，且SparkSQL支持查询原生的RDD，查询结果为DF，DF和RDD可以互转
+2. Spark on Hive，即SparkSQL，其中Hive作为存储，解析优化和执行引擎都是Spark
+3. Hive on Spark，解析和优化都是Hive，Spark作为执行引擎，底层不是MR而是Spark job
+4. DF是由列式RDD组成的，由sqlContext.read(文件)或者sqlContext.sql(sql语句)。df = sqlContext.read().format().load(); df.show(); df.preintSchema(); df.registerTempTable()可以将DF注册为临时表，临时表是个指针，不是disk或者memory中的文件
+5. df和RDD互相转化**df->RDD**:Java<Row> rdd = df.javaRDD() **RDD->df**:sqlContext.createDataFrame(RDD, obj.class)利用反射机制，自定义类要实现序列化接口(节点之间传送对象的时候必须序列化，)
