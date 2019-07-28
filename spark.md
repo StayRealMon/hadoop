@@ -61,3 +61,15 @@ Action(foreach/count/collect)
 3. Hive on Spark，解析和优化都是Hive，Spark作为执行引擎，底层不是MR而是Spark job
 4. DF是由列式RDD组成的，由sqlContext.read(文件)或者sqlContext.sql(sql语句)。df = sqlContext.read().format().load(); df.show(); df.preintSchema(); df.registerTempTable()可以将DF注册为临时表，临时表是个指针，不是disk或者memory中的文件
 5. df和RDD互相转化**df->RDD**:Java<Row> rdd = df.javaRDD() **RDD->df**:sqlContext.createDataFrame(RDD, obj.class)利用反射机制，自定义类要实现序列化接口(节点之间传送对象的时候必须序列化，)
+
+## Kafka ##
+分布式消息队列：系统之间解耦；峰值压力缓冲，给后续提供稳定输入；异步通信；高吞吐；存磁盘不丢失，顺序写顺序读，直接append到文件之后；分布式partition有副本
+producer&consumer&broker(处理读写请求和存储消息，通过zookeeper协调broker节点)&topic(消息队列/分类)
+1. 一个topic由多个partition组成，每个partition内部消息强有序，每个消息都有offset，提高并行度，每个consumer只能读取一个partition；partition是严格FIFO的，topic不是严格的
+2. n partition ： 1 broker，一个partition仅有唯一broker管理维护。
+3. 消息直接写入文件不存储在内存中
+4. producer以(轮询负载均衡或者基于hash)决定往某一个partition写消息
+默认保存一周，不是消费完就删除
+5. consumer有group的概念，topic中的消费仅可被一个group消费一次
+6. group内是queue消费模型，不同的consumer消费不同的partition，没消费完可以被其他consumer继续消费；consumer利用zookeeper维护消费到partition的某个offset；
+7. zk协调broker/存储元数据/consumer的offset信息/topic信息和partition信息
