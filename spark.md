@@ -73,3 +73,7 @@ producer&consumer&broker(处理读写请求和存储消息，通过zookeeper协�
 5. consumer有group的概念，topic中的消费仅可被一个group消费一次
 6. group内是queue消费模型，不同的consumer消费不同的partition，没消费完可以被其他consumer继续消费；consumer利用zookeeper维护消费到partition的某个offset；
 7. zk协调broker/存储元数据/consumer的offset信息/topic信息和partition信息
+
+> kafka也是依赖于zk，需要有zk环境的支持；配置kafka的config/*.properties；启动zk/kafka(bin/*start.sh config/*.properties)
+> 启动之后可以创建查看删除topic(bin/kafka-topic.sh --create/describe/delete)
+> 在producer/consumer窗口启动消息控制台(bin/kafka-console-*.sh)
