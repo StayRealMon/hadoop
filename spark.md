@@ -77,3 +77,26 @@ producer&consumer&broker(处理读写请求和存储消息，通过zookeeper协�
 > kafka也是依赖于zk，需要有zk环境的支持；配置kafka的config/*.properties；启动zk/kafka(bin/*start.sh config/*.properties)
 > 启动之后可以创建查看删除topic(bin/kafka-topic.sh --create/describe/delete)
 > 在producer/consumer窗口启动消息控制台(bin/kafka-console-*.sh)
+
+
+## flink ##
+
+### datastream API ###
+三步操作：source//sink
+基本操作：1基于单条记录filtermap2基于窗口window3合并和拆分流union/join/connect/split
+基本转换：
+![](https://uploadfiles.nowcoder.com/images/20190730/4206388_1564494354701_572736687DEDA6D4B1B0B8477DE6C952)
+
+window理解为纵向切分。keyby理解为横向切分，将相同key的分发到一起，类似于map？
+物理分组：dataStream.global/boardcast/forward/shuffle/rebalance
+
+### flink sql ###
+高层声明式api/自动优化/流批一体
+**聚合**：window-aggregate&group-aggregate
+window-aggregate(窗口内的小型批处理)：tumble(固定)/hop(滑动)/session(会话)
+group-aggregate(没有窗口，来一条处理一条，结果是在不断更新，不适合kafka适合mysql等可更新数据库)：
+> win-aggr：按时，一条只处理一次，appendStream不更新，及时处理历史数据，后可接任意sink
+> 
+> group-aggr：提前输出，一条输出N个结果(sink压力)，updateStream更新，状态无限增长(根据精确性设置TTL)，后接可更新结果表Hbase/mysql
+
+建表不支持DDL，用配置文件生成
