@@ -65,7 +65,7 @@ Action(foreach/count/collect)
 ## Kafka ##
 分布式消息队列：系统之间解耦；峰值压力缓冲，给后续提供稳定输入；异步通信；高吞吐；存磁盘不丢失，顺序写顺序读，直接append到文件之后；分布式partition有副本
 producer&consumer&broker(处理读写请求和存储消息，通过zookeeper协调broker节点)&topic(消息队列/分类)
-1. 一个topic由多个partition组成，每个partition内部消息强有序，每个消息都有offset，提高并行度，每个consumer只能读取一个partition；partition是严格FIFO的，topic不是严格的
+1. 一个topic由多个partition组成(便于扩展，提高并发度)，每个partition内部消息强有序，每个消息都有offset，提高并行度，每个consumer只能读取一个partition；partition是严格FIFO的，topic不是严格的
 2. n partition ： 1 broker，一个partition仅有唯一broker管理维护。
 3. 消息直接写入文件不存储在内存中
 4. producer以(轮询负载均衡或者基于hash)决定往某一个partition写消息
@@ -79,7 +79,20 @@ producer&consumer&broker(处理读写请求和存储消息，通过zookeeper协�
 > 在producer/consumer窗口启动消息控制台(bin/kafka-console-*.sh)
 
 
+### producer写入流程 ###
+1. 先从broker-list获取partition的leader
+2. producer和leader连接交互传数据(ack设置为0,1,all)
+3. leader写消息到log
+4. follower从leader中pull消息并写入自身log
+5. 最后leader给producer反馈ack
+
 ## flink ##
+flink1.6+hadoop2.7+scala2.12
+/conf/.yaml&slave
+### 任务提交 ###
+**YARN**：flink client找RM提交申请启动JobM，JM向AM申请资源，RM返回资源，JM通知申请到的NM节点启动taskManager
+### 任务调度 ###
+flink client先把code转换成DataFlow Graph，发送给JM之后，JM根据Graph的关系划分为task并分到TM上，并启动slot进行parallelize计算
 
 ### datastream API ###
 三步操作：source//sink
