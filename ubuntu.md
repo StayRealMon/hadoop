@@ -44,6 +44,8 @@ mysql -u root -p (root)
 6. 测试外网 ping www.baidu.com
 7. 用户权限和密码设置sudo passwd -u root查看用户root是否设置密码；sudo passwd root给root设置密码
 8. 安装postgresql sudo agt-get install postgresql  (自带了一个用户postgres，在这个用户下创建用户createuser --interavtive，创建数据库createdb -e hello，进入psql命令模式查看用户和库和表\du \l \d)
+9. 查看网关nm-tool
+10. apt-get install rpm 利用rpm查看java版本
 
 
 ## 压缩包 ##
