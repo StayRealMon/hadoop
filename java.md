@@ -7,6 +7,48 @@
 7. 抽象函数interface
 > 重载，继承，多态，接口，虚函数，并发，线程
 
+### 面试题###
+|@| String、StringBuffer、StringBuilder的区别，怎么理解String不变性
+|@| ==和equals的区别，如果重写了equals()不重写hashCode()会发生什么
+|@| HashMap原理，为什么用红黑树，红黑树的特点
+> implements Map接口实现;线程不安全;允许使用null(仅一个键为null)和null值;无序;避免进行多次扩容;jdk1.8后对HashMap的改进:链表长度超过阈值时，将链表转换为红黑树
+
+
+|@| HashMap和HashTable的区别，HashMap怎么解决hash冲突
+> 1. Hashtable是线程安全(实现方法里面都添加了synchronized关键字来确保线程同步)性能较高，而HashMap则非线程安全;
+> 2. HashTable实现了Map接口和Dictionary抽象类;
+> 3. HashMap的初始容量为16，Hashtable初始容量为11，两者的填充因子默认都是0.75;HashMap扩容时是当前容量翻倍即:capacity*2，Hashtable扩容时是容量翻倍+1即:capacity*2+1;
+> 4. Hashtable计算hash是直接使用key的hashcode对table数组的长度直接进行取模,HashMap计算hash对key的hashcode进行了二次hash，以获得更好的散列值，然后对table数组长度取模
+
+
+|@| 讲讲ConcurrentHashMap，ConcurrentHashMap怎么保证线程安全，HashTable怎么保证线程安全
+|@| HashSet的底层实现，是不是线程安全的
+|@| ArrayList和LinkedList的区别，是不是线程安全的
+|@| 内部类，什么是匿名内部类
+|@| java为什么不能多继承(子类有多个父类，并且具有他们的特征)
+> 单继承易读易维护语义清晰逻辑清楚，体现**类的本质**;若一个子类继承的多个父类拥有相同方法，同时子类并未覆盖该方法（若覆盖，则直接使用子类中该方法），那么调用该方法时将无法确定调用哪个父类的方法
+
+
+|@| 讲一下java抽象类abstract和接口interface/implements(接口中成员变量均默认为 static final)
+> 1. 接口指明了一个类必须要做什么和不能做什么
+> 2. 接口是解决Java无法使用多继承的一种手段 
+> 3. 抽象方法只能存在于抽象类或者接口中，但抽象类中却能存在非抽象方法，即有方法体的方法。接口是百分之百的抽象类.抽象类内部可能包含非final的变量，但是在接口中存在的变量一定是final,public,static的 
+> 4. 不能直接去实例化一个接口 
+> 5. abstract class知道一类物体的部分行为（和属性），但是不清楚另一部分的行为（和属性），所以我不能自己实例化；interface不能定义（它只做了声明）共同的行为，事实上它也不能定义“非常量”的变量
+
+|@| java单例模式的实现，懒汉、饿汉
+|@| 进程与线程的区别，多进程和多线程的区别
+|@| java实现多线程的方式
+|@| 讲讲设计模式，最常用哪种设计模式，单例模式的实现方式
+|@| 进程和线程，Java实现多线程的方式，什么是线程安全，怎么保证多线程线程安全
+|@| volatile怎么保证可见性，synchronized和lock的区别，synchronized的底层实现
+|@| sleep和wait的区别，sleep会不会释放锁，notify和notifyAll的区别
+|@| 什么情况会发生死锁，死锁的处理方法
+|@| 可重入锁的可重入性是什么意思，哪些是可重入锁
+|@| 为什么要用线程池，线程池的好处
+|@| JVM垃圾处理方法，对象什么时候进入老年代，什么时候进行FullGC
+|@| Java堆溢出问题怎么处理，内存泄漏和内存溢出的区别 
+
 ## 面向对象的基本原则 ##
 > s( Single-Resposibility Principle ): 单一职责原则
 > o( Open-Closed principle ): 开放封闭原则

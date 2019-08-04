@@ -94,8 +94,21 @@ flink1.6+hadoop2.7+scala2.12
 ### 任务调度 ###
 flink client先把code转换成DataFlow Graph，发送给JM之后，JM根据Graph的关系划分为task并分到TM上，并启动slot进行parallelize计算
 
+### datasource ###
+StreamExecutionEnvironment.addSource(sourceFunction)
+1. sourceFunction包括并行和非并行；自带实现好的有fromCollection()fromElements()fromParallelCollection()generateSequence
+2. DataStream<> ds = env.readTextFile(path)//socketTextStream(port)
+3. 自定义SF需要实现SourceFunction 接口，有两个方法run()和cancel()
+
+### datasink ###
+1. 接口类SinkFunction有一个invoke()方法和RichSinkFunction()抽象类
+2. 自定义SF继承RichSinkFunction()，重写invoke()方法，写入Kafka/Mysql等中
+
+### Transformation ###
+处理datasource，有map/FlatMap/Filter/KeyBy(返回为KeyedStream格式)/Reduce/Fold/Aggregations/Window/WindowAll/Union/WindowJoin/Split/Select/Project
+
 ### datastream API ###
-三步操作：source//sink
+三步操作：source/transformation/sink
 基本操作：1基于单条记录filtermap2基于窗口window3合并和拆分流union/join/connect/split
 基本转换：
 ![](https://uploadfiles.nowcoder.com/images/20190730/4206388_1564494354701_572736687DEDA6D4B1B0B8477DE6C952)
