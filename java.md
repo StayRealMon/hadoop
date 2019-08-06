@@ -2,7 +2,7 @@
 2. GC、JVM
 3. Stringbuilder、Stringbuffer
 4. List、ArrayList、HashMap
-5. final 关键字transient不可被序列化
+5. final 关键字transient不可被序列化(transient修饰变量，不修饰class和function；class可以实现serializable实现序列化；static不可被序列化无论是否有transient；实现Externalizable接口后若实现writeExternal方法即使被transient修饰也可以被序列化)
 6. 子类父类虚函数
 7. 抽象函数interface
 > 重载，继承，多态，接口，虚函数，并发，线程
@@ -13,8 +13,15 @@
 > 2. StringBuilder：线程非安全的，适用于单线程；StringBuffer：线程安全的适用于多线程
 > 3. StringBuilder是可变对象，用来高效拼接字符串，且支持链式操作，实现链式操作的关键是返回实例本身
 |@| ==和equals的区别，如果重写了equals()不重写hashCode()会发生什么
+> 1. **==**对于基本类型比较值是否相同；引用类型比较内存地址是否相等；**equals**是所有object对象都有的方法，作用于对象(引用值)，比较内存地址是否相同
+> 2. String已经实现了equals方法用于比较str的值是否相等，string不是基本类型，比较用==比较的是地址
+> 3. hashcode计算对象的内存地址哈希值，若重写equals不重写hashcode，会导致equals返回true(对象值相等)hashcode返回false(内存地址不相等)
+> 4. 两个对象相等，hashcode一定相等；两个对象不等，hashcode不一定不等；hashcode相等，两个对象不一定相等；hashcode不等，两个对象一定不等
+
 |@| HashMap原理，为什么用红黑树，红黑树的特点
-> implements Map接口实现;线程不安全;允许使用null(仅一个键为null)和null值;无序;避免进行多次扩容;jdk1.8后对HashMap的改进:链表长度超过阈值时，将链表转换为红黑树
+> 1. implements Map接口实现;线程不安全;允许使用null(仅一个键为null)和null值;无序;避免进行多次扩容;jdk1.8后对HashMap的改进:链表长度超过阈值(8)时，将链表转换为红黑树
+> 2. 先声明一个下标范围比较大的数组来存储元素，通过哈希算法获得每一个元素的Key对应的数组下标。数组存储的元素是一个Entry类，这个类有三个数据域，key、value（键值对），next(指向下一个Entry)
+> 3. HashMap由数组+链表组成的，数组是HashMap的主体，链表则是主要为了解决哈希冲突而存在的
 
 
 |@| HashMap和HashTable的区别，HashMap怎么解决hash冲突
@@ -28,6 +35,9 @@
 |@| HashSet的底层实现，是不是线程安全的
 |@| ArrayList和LinkedList的区别，是不是线程安全的
 |@| 内部类，什么是匿名内部类
+> 1. 内部类当中可以调用外部类当中的属性和方法，而外部类却不能调用内部类当中的
+
+
 |@| java为什么不能多继承(子类有多个父类，并且具有他们的特征)
 > 单继承易读易维护语义清晰逻辑清楚，体现**类的本质**;若一个子类继承的多个父类拥有相同方法，同时子类并未覆盖该方法（若覆盖，则直接使用子类中该方法），那么调用该方法时将无法确定调用哪个父类的方法
 
