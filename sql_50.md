@@ -1,12 +1,26 @@
 ### 面试题 ###
 学生成绩表，把每科最高分前三名统计出来
-sql有几种join，map join了解过没
+> SELECT a.* FROM test a
+LEFT JOIN test b ON a.subject_id=b.subject_id AND a.score<b.score
+GROUP BY a.user_id,a.subject_id,a.score HAVING COUNT(b.id)<3
+ORDER BY a.subject_id,a.score DESC
+> select tabscore.* from tabscore
+where 
+(select count(1) from tabscore tb2 where tb2.course = tabscore.course and tb2.score>tabscore.score)<2
+
+
+|@| sql有几种join，map join了解过没
+> map join是相对于common join的一种优化，省去shullfe和reduce的过程
+> 小表读进Hash Table Files上传到HDFS的缓存中,然后启动一个map作业，每读取一条数据，就与缓存中的小表进行join操作，直至整个大表读取结束
+> set hive.auto.convert.join = true; 若为false，则为common join；若为true，则为map join
+
+
 写一条sql删除订单表中重复的记录
 一张网页浏览信息表，有两列，一列是网页ip，一列是浏览网页的用户（比如a或者b、c、d直到z），求这些网页被a和b或者a和c或者b和c**两两组合访问**的次数
 单科成绩高于该科平均成绩的同学名单（无论该学生有多少科，只要有一科满足即可
 sql题：找出单科成绩高于该科平均成绩的同学名单（该学生所有科都必须满足
 sql查询，找出互相关注的用户对数
-基于row_number()的sql题
+基于row_number()的sql题(@rank:=@rank+1)
 
 
 ## 分组排名 ##

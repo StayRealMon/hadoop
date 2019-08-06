@@ -1,6 +1,20 @@
 ### mysql面试题 ###
 数据库索引，B树和B+树
-介绍一下索引，索引设置的规则，聚簇索引和非聚簇索引的区别，索引的最左前缀原则
+|@| 介绍一下索引，索引设置的规则，，索引的最左前缀原则
+> 唯一性索引找**区分度高**的列建索引；**经常查询排序分组统计**的列建立索引；**数据量小**的列；尽量扩展索引**rebuild**避免删除新建
+
+|@| 聚簇索引和非聚簇索引的区别
+> 1. 聚簇索引：将数据存储与索引放到了一块，找到索引也就找到了数据**InnoDB**；非聚簇索引：将数据存储于索引分开结构**MyISM**
+> 2. 主键(自增)默认使用聚簇索引，只要索引是相邻的，那么对应的数据一定也是相邻地存放在磁盘上的。
+> 3. 聚簇优势：访问同一数据页不同行记录时，已经把页加载到了Buffer中，再次访问的时候，会在内存中完成访问，**减少I/O**；适合用在排序的场合；适合取出一定范围数据；减少了当出现行移动或者数据页分裂时辅助索引的维护工作
+
+![https://www.jianshu.com/p/fa8192853184](https://upload-images.jianshu.io/upload_images/10154499-d53a5ce9cecf22f3.png?imageMogr2/auto-orient/strip%7CimageView2/2/w/864/format/webp)
+
+|@| [explain优化指标](https://www.cnblogs.com/gdwkong/articles/8505125.html "explain优化指标")
+> 1. table ：这一列是查询设计的表
+> 2. type ：指标从好到坏依次是：system>const>eq_ref>ref(最好能达到，表示所有具有匹配的索引的行都被用到)>fulltext>ref_or_null>index_merge>unique_subquery>index_subquery>range(索引范围内查找)>index(全索引树扫描)>ALL(全表扫描)
+> 3. rows:行数
+
 
 # Join 从句 #
 ## 内连接 全外连接 左、右连接 交叉连接 ##
