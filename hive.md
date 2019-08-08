@@ -7,7 +7,9 @@
 改造hive表后怎么进行数据一致性校验的，有没有自动化流程
 数据建模，星型模型和雪花模型
 hbase中row key该怎么设计
-大表Join小表优化，怎么解决hive数据倾斜问题
+|@| 大表Join小表优化，怎么解决hive数据倾斜问题
+> 分为common join 和 map join；common join就是普通的mr任务，输出文件为reduce个数，map join没有reduce阶段，小表在左先读到hashtable中，left join大表，map大表读数据遍历hashtable做连接，输出文件个数为map的个数
+
 每天浏览页面的新用户
 如何解决数据倾斜
 parquet(二进制方式存储的，所以是不可以直接读取的，文件中包括该文件的数据和元数据) orc textfile
