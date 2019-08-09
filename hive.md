@@ -209,6 +209,14 @@ AS()中的数据是处理后的数据，对应insert新表的fields
 > 用distribute by 会对指定的字段按照hashCode值对reduce的个数取模，然后将任务分配到对应的reduce中去执行
 > 就是在mapreduce程序中的patition分区过程，默认根据指定key.hashCode()&Integer.MAX_VALUE%numReduce 确定处理该任务的reduce
 
+###Sqoop & DataX ###
+> 1. sqoop1没有server  且不和sqooo2兼容；
+> 2. 原理是将导入作业转化为只有Map任务的MR，每个map读取一片数据，并发执行
+> 3. DataX会将同步作业当成一个job，一个job是一个进程
+> 4. job模块负责所有job的任务切分和task group的管理
+> 5. 切分job为task便于并发执行，task为最小工作单元
+> 6. job模块调用Schedule模块，Schedule将切分后的task重新组合成task group
+> 7. 每一个Task都由TaskGroup负责启动，Task启动后，会固定启动Reader→Channel→Writer的线程来完成任务
 
 ## Question ##
 ### 0628 ###

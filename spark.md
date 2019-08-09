@@ -143,6 +143,12 @@ StreamExecutionEnvironment.addSource(sourceFunction)
 window理解为纵向切分。keyby理解为横向切分，将相同key的分发到一起，类似于map？
 物理分组：dataStream.global/boardcast/forward/shuffle/rebalance
 
+###time & window###
+1. event time(事件的创建时间)&Ingestion time(数据进入flinnk事件)&windows process time(基于时间操作算子的本地系统时间，默认时间)
+2. 对time进行聚合，从而划分窗口，在windows内部操作算子；windows分为count window(不是数据量够count就执行，是相同的key达到count时才会执行)和time window两大类(默认按照process time处理)
+3. tumbling(不重叠，windowsize)/sliding(重叠，windowsize&windowslide)/session(session是time window特有的，两个session的process time 大于windowsize时候，pro time前面的就被一个session window处理)
+
+watermark：用来标记数据时间，类似一个阈值？不再接收到比wm小的时间数据
 ### flink sql ###
 高层声明式api/自动优化/流批一体
 **聚合**：window-aggregate&group-aggregate
@@ -155,3 +161,5 @@ group-aggregate(没有窗口，来一条处理一条，结果是在不断更新�
 建表不支持DDL，用配置文件生成
 
 CEP规则匹配?
+
+https://www.jianshu.com/p/0a15d44405cc
