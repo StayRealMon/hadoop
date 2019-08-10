@@ -98,6 +98,8 @@ producer&consumer&broker(处理读写请求和存储消息，通过zookeeper协�
 > 启动之后可以创建查看删除topic(bin/kafka-topic.sh --create/describe/delete)
 > 在producer/consumer窗口启动消息控制台(bin/kafka-console-*.sh)
 
+### 零拷贝 ###
+为什么kafka比rm快，答了零拷贝，具体实现原理答错了，应该是避免复制数据到应用缓冲，直接使用sendfile传输数据
 
 ### producer写入流程 ###
 1. 先从broker-list获取partition的leader
