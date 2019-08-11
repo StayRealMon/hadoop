@@ -1,7 +1,16 @@
 ## 面试 ##
-zookeeper做分布式锁
-flink了解哪些，它的基本架构原理
-很大的m*n的数组中，每一行有序，每一列无序，如何求其topk
+|@| zookeeper做分布式锁
+|@| flink了解哪些，它的基本架构原理
+|@| 很大的m*n的数组中，每一行有序，每一列无序，如何求其topk
+|@| 短url映射长url，系统qps5000，要求设计一套完整的高可用分布式系统，设计数据库结构，负载均衡等，且要求可以1s内查询到出现次数前100的Url
+
+> 全局自增id做可逆哈希，lru缓存常用的
+
+|@| kafka的原理，kafka作为消息队列和redis的区别；
+|@| 一个topic中的partition是不是一定散布在同一个broker中？
+|@| 如果要保证消息全局有序，怎么做？
+|@| leader选举是怎么选的？
+|@| kafka中consumer怎么保持状态的？
 
 ## 实时 ##
 > 1. 实时部分：业务主要为发单量、行程量、成交单量，通过flink实时消费数据库WAL变更日志，进行实时的聚合统计，在某些场景下需要用redis缓存订单的中间计算状态,将最终计算结果输出至HBase，供实时接口查询，形成订单滚动大屏的效果
@@ -119,7 +128,8 @@ producer&consumer&broker(处理读写请求和存储消息，通过zookeeper协�
 flink1.6+hadoop2.7+scala2.12
 /conf/.yaml&slave
 ### 任务提交 ###
-**YARN**：flink client找RM提交申请启动JobM，JM向AM申请资源，RM返回资源，JM通知申请到的NM节点启动taskManager
+**YARN**：flink client找RM提交申请启动JobM，JM从HDFS加载jar包等资源，向AM申请资源，RM根据所需返回资源，JM通知申请到的NM节点启动taskManager
+
 ### 任务调度 ###
 flink client先把code转换成DataFlow Graph，发送给JM之后，JM根据Graph的关系划分为task并分到TM上，并启动slot进行parallelize计算
 
@@ -149,8 +159,15 @@ window理解为纵向切分。keyby理解为横向切分，将相同key的分发
 1. event time(事件的创建时间)&Ingestion time(数据进入flinnk事件)&windows process time(基于时间操作算子的本地系统时间，默认时间)
 2. 对time进行聚合，从而划分窗口，在windows内部操作算子；windows分为count window(不是数据量够count就执行，是相同的key达到count时才会执行)和time window两大类(默认按照process time处理)
 3. tumbling(不重叠，windowsize)/sliding(重叠，windowsize&windowslide)/session(session是time window特有的，两个session的process time 大于windowsize时候，pro time前面的就被一个session window处理)
+4. window是左闭右开的
 
-watermark：用来标记数据时间，类似一个阈值？不再接收到比wm小的时间数据
+### Event Time & Window ###
+flink 时间轴默认使用processTime，生产环境一般使用EventTime
+1. 创建Env后，声明使用eventTime
+2. window会先被创建，然后等待数据等待触发，
+
+**延时触发机制watermark**：用来处理乱序时间，当window end time小于watermark时会触发这个window；数据流中的waterMark用于表示所有数据携带的一个隐藏信息
+(用来标记数据时间，类似一个阈值？不再接收到比wm小的时间数据，其余的再来晚的数据就被抛弃)
 ### flink sql ###
 高层声明式api/自动优化/流批一体
 **聚合**：window-aggregate&group-aggregate
