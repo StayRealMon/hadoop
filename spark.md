@@ -1,13 +1,16 @@
 ## 面试 ##
 |@| zookeeper做分布式锁
 |@| flink了解哪些，它的基本架构原理
+> flink on yarn 的任务提交和任务调度 & 两种window(count||time)三种窗口方式(tumble/slide/session)以及三个time(event/ingestion/process) & watermark
+
 |@| 很大的m*n的数组中，每一行有序，每一列无序，如何求其topk
 |@| 短url映射长url，系统qps5000，要求设计一套完整的高可用分布式系统，设计数据库结构，负载均衡等，且要求可以1s内查询到出现次数前100的Url
-
-> 全局自增id做可逆哈希，lru缓存常用的
+> 全局自增id做可逆哈希(发号器，单双号，自增id数字转62进制存储，lru淘汰机制，短url存在缓存数据库中有时效可延长，命中后返回302重定向可记录点击率)，lru缓存常用的
 
 |@| kafka的原理，kafka作为消息队列和redis的区别；
 |@| 一个topic中的partition是不是一定散布在同一个broker中？
+> 不一定。一个topic由多个partition组成且分布在不同的broker中，有利于并发读。partition有备份机制都放在一个节点宕机就凉了
+
 |@| 如果要保证消息全局有序，怎么做？
 |@| leader选举是怎么选的？
 |@| kafka中consumer怎么保持状态的？
