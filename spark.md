@@ -116,6 +116,13 @@ producer&consumer&broker(处理读写请求和存储消息，通过zookeeper协�
 > 为什么kafka比rm快，答了零拷贝，具体实现原理答错了，应该是避免复制数据到应用缓冲，直接使用sendfile传输数据
 > 网卡直接从主存中读取数据，不需要disk → read memory → application memory → write memory，直接disk → memory → consumer
 ![](https://img-blog.csdn.net/20180906202007477?watermark/2/text/aHR0cHM6Ly9ibG9nLmNzZG4ubmV0L2RzaGZfMQ==/font/5a6L5L2T/fontsize/400/fill/I0JBQkFCMA==/dissolve/70)
+### 选举 ###
+1. 只有**leader 负责读写**，**follower只负责备份**，如果leader宕机的话,Kafaka动态维护了一个同步状态的副本的集合（a set of in-sync replicas），简称ISR(针对每个Topic维护一个ISR),ISR中有f+1个节点，就可以允许在f个节点down掉的情况下不会丢失消息并正常提供服。ISR的成员是动态的，如果一个节点被淘汰了，当它重新达到“同步中”的状态时，他可以重新加入ISR。因此如果leader宕了，**直接从ISR中选择一个follower**就行；不同的topic下不同的partitioner有不同的leader，避免n×n的复杂链路，保证了一致性
+![](https://images2018.cnblogs.com/blog/137084/201806/137084-20180616151857110-745671907.png)
+
+2. 区别于ZK：zookeeper使用了ZAB(Zookeeper Atomic Broadcast)协议，保证了leader,follower的一致性，**leader 负责数据的读写**，而**follower只负责数据的读**，如果follower遇到**写操作，会提交到leader**;超过半数当leader；leader 的更新操作是按照queue队列发给follower的，且leader收到超过半数的ack就会给client返回commit消息，但是有可能更新还未成功写入到follower中，且有时差
+![](https://images2018.cnblogs.com/blog/137084/201806/137084-20180616151745378-1678869628.png)
+
 ### producer写入流程 ###
 1. 先从broker-list获取partition的leader
 2. producer和leader连接交互传数据(ack设置为0,1,all)
