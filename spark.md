@@ -9,14 +9,18 @@
 
 |@| kafka的原理，kafka作为消息队列和redis/rabbitMQ的区别；
 > kafka基于disk典型的生产消费者模式，消息可回溯(offset/timestamp)；RabbitMQ基于内存P2P模式数据消费后即删除
+> kafka典型的pull(push会造成consumer崩溃；pull会使consumer轮询)
 
 |@| 一个topic中的partition是不是一定散布在同一个broker中？
 > 不一定。一个topic由多个partition组成且分布在不同的broker中，有利于并发读。partition有备份机制都放在一个节点宕机就凉了
 
 |@| 如果要保证消息全局有序，怎么做？
 |@| leader选举是怎么选的？
-|@| kafka中consumer怎么保持状态的？
+> 维护动态ISR，有leader挂到就从set里面直接选一个，等待其他机器加入ISR；leader负责读写，follower被动replicate
 
+
+|@| kafka中consumer怎么保持状态的？
+|@| Exactly Once？
 ## 实时 ##
 > 1. 实时部分：业务主要为发单量、行程量、成交单量，通过flink实时消费数据库WAL变更日志，进行实时的聚合统计，在某些场景下需要用redis缓存订单的中间计算状态,将最终计算结果输出至HBase，供实时接口查询，形成订单滚动大屏的效果
 > 2. 近线业务：通过kafka+flume和自定义flume interceptor来消费WAL日志，并进行replay数据，近线还原数据库数据至数仓，目前延迟是20分钟，此延迟可以配置，不过最短延迟不要小于5min
@@ -105,7 +109,7 @@ producer&consumer&broker(处理读写请求和存储消息，通过zookeeper协�
 4. producer以(轮询负载均衡或者基于hash)决定往某一个partition写消息
 默认保存一周，不是消费完就删除
 5. consumer有group的概念，topic中的消费仅可被一个group消费一次
-6. group内是queue消费模型，不同的consumer消费不同的partition，没消费完可以被其他consumer继续消费；consumer利用zookeeper维护消费到partition的某个offset；
+6. group内是queue消费模型，不同的consumer消费不同的partition，没消费完可以被其他consumer继续消费；consumer利用zookeeper维护消费到partition的某个offset；所有consumer都在一个group就等价于queue，每个group只有一个consumer就等价于发布订阅系统
 7. zk协调broker/存储元数据/consumer的offset信息/topic信息和partition信息
 
 > kafka也是依赖于zk，需要有zk环境的支持；配置kafka的config/*.properties；启动zk/kafka(bin/*start.sh config/*.properties)
@@ -113,11 +117,18 @@ producer&consumer&broker(处理读写请求和存储消息，通过zookeeper协�
 > 在producer/consumer窗口启动消息控制台(bin/kafka-console-*.sh)
 
 ### 零拷贝 ###
+1. 高性能的将数据从页面缓存发送到socket的系统函数(Linux中是sendfile)
 > 为什么kafka比rm快，答了零拷贝，具体实现原理答错了，应该是避免复制数据到应用缓冲，直接使用sendfile传输数据
 > 网卡直接从主存中读取数据，不需要disk → read memory → application memory → write memory，直接disk → memory → consumer
+>> 1. 操作系统把数据从文件拷贝内核中的页缓存中
+>> 2. 应用程序从页缓存从把数据拷贝自己的内存缓存中
+>> 3. 应用程序将数据写入到内核中socket缓存中
+>> 4. 操作系统把数据从socket缓存中拷贝到网卡接口缓存，从这里发送到网络上。
 ![](https://img-blog.csdn.net/20180906202007477?watermark/2/text/aHR0cHM6Ly9ibG9nLmNzZG4ubmV0L2RzaGZfMQ==/font/5a6L5L2T/fontsize/400/fill/I0JBQkFCMA==/dissolve/70)
+
 ### 选举 ###
-1. 只有**leader 负责读写**，**follower只负责备份**，如果leader宕机的话,Kafaka动态维护了一个同步状态的副本的集合（a set of in-sync replicas），简称ISR(针对每个Topic维护一个ISR),ISR中有f+1个节点，就可以允许在f个节点down掉的情况下不会丢失消息并正常提供服。ISR的成员是动态的，如果一个节点被淘汰了，当它重新达到“同步中”的状态时，他可以重新加入ISR。因此如果leader宕了，**直接从ISR中选择一个follower**就行；不同的topic下不同的partitioner有不同的leader，避免n×n的复杂链路，保证了一致性
+集群由一个节点controller负责leader的选举和所有partition的均匀分布，使每个节点都会存在一定比例的leader
+1. 只有**leader 负责读写**，**follower只负责备份(被动)**，如果leader宕机的话,Kafaka动态维护了一个同步状态的副本的集合（a set of in-sync replicas），简称ISR(针对每个Topic维护一个ISR),ISR中有f+1个节点，就可以允许在f个节点down掉的情况下不会丢失消息并正常提供服。ISR的成员是动态的，如果一个节点被淘汰了，当它重新达到“同步中”的状态时，他可以重新加入ISR。因此如果leader宕了，**直接从ISR中选择一个follower**就行；不同的topic下不同的partitioner有不同的leader，避免n×n的复杂链路，保证了一致性；ISR(0,1,all)反馈ack之后leader反馈commit给client
 ![](https://images2018.cnblogs.com/blog/137084/201806/137084-20180616151857110-745671907.png)
 
 2. 区别于ZK：zookeeper使用了ZAB(Zookeeper Atomic Broadcast)协议，保证了leader,follower的一致性，**leader 负责数据的读写**，而**follower只负责数据的读**，如果follower遇到**写操作，会提交到leader**;超过半数当leader；leader 的更新操作是按照queue队列发给follower的，且leader收到超过半数的ack就会给client返回commit消息，但是有可能更新还未成功写入到follower中，且有时差
@@ -136,6 +147,10 @@ producer&consumer&broker(处理读写请求和存储消息，通过zookeeper协�
 > 可恢复性：处理过程失效，恢复后可继续处理。
 > 顺序保证：消息队列保证顺序。Kafka保证一个Partition内消息有序。
 > 异步通信：消息队列允许消息加入队列，等需要时再处理。
+
+### Message Set 数据压缩###
+> 支持GZIP和Snappy压缩协议；端到端的压缩
+> 客户端的消息可以一起被压缩后送到服务端，并**以压缩后的格式写入**日志文件，**以压缩的格式发送**到consumer，消息从producer发出到consumer拿到都被是压缩的，只有在consumer**使用的时候才被解压缩**，所以叫做“端到端的压缩”。
 
 ## flink ##
 flink1.6+hadoop2.7+scala2.12
