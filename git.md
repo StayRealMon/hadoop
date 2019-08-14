@@ -1,3 +1,11 @@
+## FATAL ##
+    git remote -v
+    git config --list
+    git status
+    git remote set-url origin 你的远端地址
+    
+[https://blog.csdn.net/Leolu007/article/details/79129446](https://blog.csdn.net/Leolu007/article/details/79129446 "详情查看")
+
 ## 新的Git免密登录配置 ##
 > 查看是否有现有的公钥
 > cd ~/.ssh  No such file or directory
