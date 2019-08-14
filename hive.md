@@ -1,9 +1,7 @@
 ### 面试题 ###
 |@| 写过UDF，谈谈对UDF的理解，写UDF的目的，代码怎么写的
 > 1. UDF函数可以直接应用于select语句，对查询结构做格式化处理后，再输出内容
-> 
 > 2. 自定义UDF需要继承import org.apache.hadoop.hive.ql.exec.UDF；需要定义并实现evaluate函数
-> 
 > 3. 
 
 改造hive表后怎么进行数据一致性校验的，有没有自动化流程
