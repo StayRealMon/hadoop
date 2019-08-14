@@ -1,7 +1,9 @@
 ### 面试题 ###
 |@| 写过UDF，谈谈对UDF的理解，写UDF的目的，代码怎么写的
 > 1. UDF函数可以直接应用于select语句，对查询结构做格式化处理后，再输出内容
+> 
 > 2. 自定义UDF需要继承import org.apache.hadoop.hive.ql.exec.UDF；需要定义并实现evaluate函数
+> 
 > 3. 
 
 改造hive表后怎么进行数据一致性校验的，有没有自动化流程
@@ -11,13 +13,19 @@ hbase中row key该怎么设计
 > 分为common join 和 map join；common join就是普通的mr任务，输出文件为reduce个数，map join没有reduce阶段，小表在左先读到hashtable中，left join大表，map大表读数据遍历hashtable做连接，输出文件个数为map的个数
 
 每天浏览页面的新用户
-如何解决数据倾斜
+如何解决数据倾斜(顺风车司机性别比97：3)
 parquet(二进制方式存储的，所以是不可以直接读取的，文件中包括该文件的数据和元数据) orc textfile
 
 > 设计数据模型的同时思考三个问题： 业务量多大？ 并发度多少？数据存储的有效期？PostgreSQL单库QPS建议不超过5000；Redis单节点QPS建议不超过50000
 
 |@| Hive SQL基础函数
-
+> 1. 日期函数：from_unixtime(1323308943,'yyyyMMdd')/to_date('2011-12-08 10:03:01')T-1分区同步常用，若跨月跨年在sqoop中结合case when和字符串连接实现/date_add('2012-12-08',10)和date_sub('2012-12-08',10)直接±10天/
+> 2. 条件函数：if条件select if(app_name = 'group',object_id,null) as deal_id from...变量赋值加冒号，判断直接用等号/查找第一个非空select coalesce(uuid,'') as uuid from...全空返回null/case when支持多条件判断，select case when fun1 then value1 when fun2 then value2 ... else value3 end as res from ...
+> 3. 字符串函数：length('string')/reverse('gnirts')/concat('a','b','c')concat_ws('','a','b','c')/ucase('upper')lcase('LOWER')/ltrim('  ab   c  ')rtrim('  ab   c  ')trim('  ab   c  ')/split('testString','|@|')/substr('abcde',3,2) = 'cd'  substr('abcde',3) = 'cde'/select regexp_replace('foobar', 'oo|ar', '') from... = 'fb'
+> 4. 聚合函数：Group by语句只能select和group有关的字段，不能显示多余的字段；开窗函数func(col1)over(partition by col2, col3, order by col2)可以显示与聚合无关的字段
+> 5. 窗口函数：**ROWS** between CURRENT ROW | UNBOUNDED PRECEDING | [num] PRECEDING AND  UNBOUNDED FOLLOWING | [num] FOLLOWING| CURRENT ROW 或者 **RANGE** between [num] PRECEDING  AND [num]FOLLOWING
+> 6. **RANGE**是在单个列上做范围限定，因此order by后只能跟一个col，若order by后有多个字段只能使用**ROW**
+![](https://img-blog.csdn.net/20150211163916135?watermark/2/text/aHR0cDovL2Jsb2cuY3Nkbi5uZXQveGllcGVpZmVuZw==/font/5a6L5L2T/fontsize/400/fill/I0JBQkFCMA==/dissolve/70/gravity/Center)
 
 ### 安装模式 ###
 内嵌模式(Derby/一个活动用户)&本地模式(MetaStore位于Hive进程中)&完全远程模式(MetaStore位于数据库中，支持多用户连接)
