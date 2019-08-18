@@ -276,6 +276,7 @@ datediff(@today,@yesterday) = 1
 	SELECT a.id AS 'Id' FROM Weather a JOIN Weather b ON DATEDIFF(a.RecordDate, b.RecordDate) = 1 AND a.Temperature > b.Temperature;
 
 ## DISTINCT&GROUP BY 去重性能比较 ##
+distinct操作是IO密集型的操作
 数据量非常巨大时候，比如1000万中有300W重复数据，这时候的distinct的效率低于group by；
 对于相对重复量较小的数据量比如1000万中1万的重复量，用groupby的性能会低于distnct
 

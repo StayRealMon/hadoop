@@ -11,10 +11,17 @@
 
 ![](https://uploadfiles.nowcoder.com/images/20190524/4206388_1558706443205_D3529FCA4176D9B2F36EADAC74ABA0C4)
 
+## 适用场景 ##
+> 1. 瞬间写入量很大
+> 2. 数据更新保存多版本
+> 3. 不适用与有 join，多级索引，表关系复杂的数据模型
+> 4. 大数据量(日志记录等)快速随机访问的需求
+> 5. 动态扩展，业务简单
+
 ## HBase和关系数据库的差别 ##
 1. HBase仅提供文本类型数据，其他的自行处理
 2. 不支持表之间的关联操作查询
-3. 列式存储，CF由若干个文件保存
+3. 列式存储，CF由若干个文件保存，减少文件的寻址时间
 4. 修改和删除实际上是插入了新的带特殊标志的记录，保存有多个版本。在StoreFile进行合并的时候进行数据更新，而不是直接覆盖
 5. 支持分布式，实现高性能数据增长
 6. 不必先定义可随时插入新的限定符
@@ -26,6 +33,9 @@
 4. CF2:q1 = val1 由rowkey+cf+q1即可确定到一个cell数据
 
 ### rowkey ###
+> 1. hbase存储时，数据按照Row key的字典序(byte order)排序存储。设计rowKey时要充分利用排序存储这个特性，将经常一起读取的行存储放到一起。(位置相关性) 
+> 2. **热点问题**：提前将rowkey散列预分区，避免rowkey自增只往大的region中写数据然后split，均衡的往所有的region中写(默认的情况下，创建一张表是，只有1个region，start-end key没有边界)
+
 1. 决定一行记录/按照字典序排序/只能存储64k的字节数据
 2. rowkey的设计很关键，对实时查询
 3. 设计的时候一般会加“业务字段”+“时间戳”，先按照业务字段排序，再按照时间戳排序
@@ -37,7 +47,7 @@
 	
 		course:math,course:english
 3. 权限控制、存储和调优都是在CF的层面进行的
-同一CF下的数据存储在同一目录下，由几个文件保存
+4. 同一CF下的数据存储在同一目录下，由几个文件保存。列族尽量少，减少文件的寻址时间
 
 ### timestamp 时间戳(版本号)###
 1. 版本控制，区别cell下的数据版本。按照时间倒序排列，最新的在最前
@@ -65,6 +75,17 @@
 
 ![](https://uploadfiles.nowcoder.com/images/20190524/4206388_1558706458776_30D3AF1CE259BA1F0F2E8E421B1D3E54)
 
+### Region的拆分 ###
+1. RegionServer单独执行，Master不参与
+2. 分裂执行完毕后，会将子Region添加到hbase:meta并且汇报给Master
+3. 可以自定义切分策略，可以在hbase-site.xml设置
+
+### Region的合并 ###
+1. HClient发送指令给HMaster
+2. Master发送Merge请求给指定的RegionServer执行合并操作
+3. 将被合并的regions从hbase:meta中删除并添加合并后的region
+
+
 ## HBase写操作 ##
 1. HClient先通过Zookeeper(得到HMaster、HRegionServer、-ROOT-核心数据)，找到需要访问的HRegionServer
 2. 和HRegionServer建立连接，向Region提交变更，写入WAL日志和MemStore中
@@ -75,7 +96,17 @@
 ## HMaster作用 ##
 1. 将Regions分配给HMS&协调HMS之间的负载&维护集群的状态
 2. 通过zookeeper感知发生故障的HMS，获取并处理其对应的HLog，将故障的Regions重新分配
-3. 负责管理表的Schema和对元数据的操作，用户对Table的增删改查操作
+3. 负责管理表的Schema和对元数据的操作，用户对Table的增删改查操作，不参与表数据IO的过程
+
+### HMaster上线 ###
+1. 从zk获取唯一一个代码master的锁
+2. 扫描zk中server目录，获得当前可用的RS列表
+3. 和每个RS通信，获得当前已分配的region和regionserver的对应关系
+4. 扫描.META.region的集合，计算得到当前还未分配的region，将他们放入待分配region列表
+
+### HMaster下线 ###
+1. master下线仅导致所有**元数据的修改被冻结**(无法**创建删除**表，无法**修改**表的schema，无法进行region的**负载均衡**，无法处理**region上下线**，无法进行region的**合并**，唯一例外的是region的**split可以正常进行**，因为只有RS参与)，表的数据**读写还可以正常进行**。因此master下线短时间内对整个hbase集群没有影响
+2. zk选出新的Master
 
 ## HRegionServer作用 ##
 1. 相应用户的I/O请求，向HDFS中读写文件
@@ -89,6 +120,17 @@
 > MemStore是和HLog结合使用的，源自WAL的预习机制。日志没有写到WAL中时，HRS崩溃可以回滚到写日志之前；一旦写入WAL，数据就会写入内存MemStore中，检验MS大小，足够大的时候就作为StoreFile写入到硬盘
 
 ![](https://uploadfiles.nowcoder.com/images/20190525/4206388_1558794527381_985F1362C55C9E5953811D171D935C3F)
+
+### RegionServer上线 ###
+1. Master使用Zookeeper跟踪RegionServer状态
+2. RegionServer启动时，会首先在Zookeeper上的Server目录下建立代表自己的文件，并获得该文件的独占锁
+3. 此时订阅了zkServer的Master立即得知RS上线
+
+### RegionServer下线 ###
+1. RS下线，和ZK的session断开，zk释放RS对文件的独占锁
+2. Master不断轮询Server目录下文件的锁状态，Master发现某个RegionServer**丢失自己的的独占锁**，或者Master连续几次和RegionServer**通信都无法成功**，Master就尝试去获取代表这个RegionServer的**读写锁**
+3. Master确定RS下线后，删除Server目录下代表这台RegionServer的文件，并将这台RegionServer的Region分配给其他还活着的节点
+
 
 ## 元数据表 ##
 1. 用户表的Regions的元数据存储于.META.表中，随着Regions变多，记录Regions的元数据的.META.表也变大，因此.META.表也需要分裂成多个Regions。
@@ -130,7 +172,7 @@
 1. 用来存储-ROOT-表的地址、HMaster的地址和HRegionServer的地址。存储着所有Regions的地址；存储着HBase的schema和table元数据，Hive将元数据存储在关系数据库中，HBase存在ZK中
 2. HM通过ZK感知HRS的状态，监控HRS的上下线信息并实时通知HM
 3. HBase中可以启动多个HMaster，但是ZK的选举机制保证集群中只有一个HM为当前集群的master
-4. 当HM出现单点故障，会立即选出一个新HM的作为master
+4. 当HM出现单点故障，会立即选出一个新HM的作为master(zk的选举是按照投票来的ZAB协议，超过半数为leader，区别于kafka的ISR)
 
 ### HA配置 ###
 

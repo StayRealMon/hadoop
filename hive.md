@@ -5,13 +5,21 @@
 > 3. 
 
 改造hive表后怎么进行数据一致性校验的，有没有自动化流程
-数据建模，星型模型和雪花模型
+
 hbase中row key该怎么设计
 |@| 大表Join小表优化，怎么解决hive数据倾斜问题
-> 分为common join 和 map join；common join就是普通的mr任务，输出文件为reduce个数，map join没有reduce阶段，小表在左先读到hashtable中，left join大表，map大表读数据遍历hashtable做连接，输出文件个数为map的个数
+> 1. 分为common join 和 map join；
+> 2. common join就是普通的mr任务，输出文件为reduce个数
+> 3. map join没有reduce阶段，小表在左先读到hashtable中，left join大表，map大表读数据遍历hashtable做连接，输出文件个数为map的个数
 
-每天浏览页面的新用户
-如何解决数据倾斜(顺风车司机性别比97：3)
+|@| 如何解决数据倾斜(顺风车司机性别比97：3)
+> 1. reduce卡在99%(Hive中的count/distinct/groupby/join会触发shuffle)；container报OOM；task被kill
+> 2. 先把key散列到其他k个reduce中，就不会在一个reduce中跑任务了;两阶段聚合（局部聚合+全局聚合），适用于聚合类的shuffle操作
+> 3. 使用map join提前在map端就做好join；使用combinner合并即local reduce
+> 4. 自定义partition函数指定分区策略
+> 
+
+
 parquet(二进制方式存储的，所以是不可以直接读取的，文件中包括该文件的数据和元数据) orc textfile
 
 > 设计数据模型的同时思考三个问题： 业务量多大？ 并发度多少？数据存储的有效期？PostgreSQL单库QPS建议不超过5000；Redis单节点QPS建议不超过50000

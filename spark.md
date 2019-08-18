@@ -72,6 +72,9 @@ Resilient Distributed Dataset弹性分布式数据集，逻辑概念，实际中
 4. 分区器作用在KV格式的RDD中
 5. partition对外提供最佳的计算位置(计算移动数据不移动)
 
+> 1. 宽依赖：父RDD的分区被子RDD的多个分区使用   例如 groupByKey、reduceByKey、sortByKey等操作会产生宽依赖，会产生shuffle
+> 2. 窄依赖：父RDD的每个分区都只被子RDD的一个分区使用  例如map、filter、union等操作会产生窄依赖
+
 ### DAG ###
 RDD的Lineage关系有向无环可以看作DAG但并不是
 
