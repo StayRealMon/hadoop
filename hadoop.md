@@ -218,7 +218,15 @@ AM以作业为单位，负载到不同的节点进行作业调度，避免单点
 
 ![](https://uploadfiles.nowcoder.com/images/20190503/4206388_1556867387537_0B02D0BDA344265364CB97AE71F94407)
 
+### map 数量的确定 ###
+1. map数量和文件数、文件大小、块大小、以及split大小有关
+2. splitSize =   Math.max(minSize, Math.min(maxSize, blockSize))；一般minSize=1而maxSize很大，所以一般splitSize=blockSize=128/64M；计算密集需要更多split的时候调小maxSize
+3. map的数量一般和split数量保持一致，FileInputFormat路径中文件数量/splitSize>1.1的部分就按照一个文件一个map(前提是文件可分，压缩文件不可分ORC可分)
 
+> 1. 默认default_num = total_size(输入文件的整体大小) / block_size；
+> 2. 手动设置的大小大于default_num时候才生效；
+> 3. 每个task处理文件的大小splitSize大于blockSize时候也会生效splitSize =   Math.max(minSize, Math.min(maxSize, blockSize))
+> 4. 每一个map处理的数据是不能跨越文件的，max_map_num <= input_file_num
 
 ##WordCount##
 

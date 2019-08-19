@@ -155,6 +155,26 @@ producer&consumer&broker(处理读写请求和存储消息，通过zookeeper协�
 > 支持GZIP和Snappy压缩协议；端到端的压缩
 > 客户端的消息可以一起被压缩后送到服务端，并**以压缩后的格式写入**日志文件，**以压缩的格式发送**到consumer，消息从producer发出到consumer拿到都被是压缩的，只有在consumer**使用的时候才被解压缩**，所以叫做“端到端的压缩”。
 
+## exactly-once 语义 ##
+一个sender发送一条message到receiver。根据receiver出现fail时sender如何处理fail，可以将message delivery分为三种语义:
+1. **At Most once**：sender把message发送给receiver.无论receiver是否收到message,sender都不再重发message；receiver**最多收到一次**(0次或1次)
+2. **At Least once**：sender把message发送给receiver.当receiver在规定时间内没有回复ACK或回复了error信息,那么sender重发这条message给receiver,直到sender收到receiver的ACK；receiver**最少收到一次**(1次及以上)
+3. **Exactly once**：一条message,receiver确保只“收到”一次
+
+### Flink的EO实现 ###
+flink持续地对整个系统做snapshot，然后把global state(根据config文件设定)储存到master node或HDFS。当系统出现failure，Flink会停止数据处理，然后把系统恢复到最近的一次checkpoint。
+1. global state由**空间上分立**的process和连接这些process的channel组成(process不共享memory，通过在communication channel上进行的message pass来异步交流)，global state就是所有process,channel的local state的集合
+
+> process的local state取决于the state of local memory and the history of its activity.
+> 
+> channel的local state是上游process发送进channel的message集减去下游process从channel接收的message的差集
+
+2. Chandy-Lamport算法保证了获得一致性global state，解决了Snapshot算法共享内存(globally shared memory)和全局时钟(global clock)的问题。该算法在普通message中插入了control message – **marker**
+3. 
+
+
+幂等操作：不管在处理的时候是否有错误发生，计算的结果（包括所有所改变的状态）都一样，因为计算操作是“恰好一次的”
+
 ## flink ##
 flink1.6+hadoop2.7+scala2.12
 /conf/.yaml&slave
