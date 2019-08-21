@@ -306,3 +306,15 @@ AS()中的数据是处理后的数据，对应insert新表的fields
 
 ## 0815 ##
 分库分表数据抽取，16个库128张表，所有数据都需要，先把数据抽到stg 0-127分区中，再通过insert into overide到ods的${dt}分区中
+
+
+## 0821 dataX##
+一个job为一个进程。job分解为task，先在path下建临时文件fileName_random，再
+
+1. Job模块是单个作业的中枢管理节点，承担了数据清理、子任务切分(将单一作业计算转化为多个子Task)、TaskGroup管理等功能。
+2. job会先split成tasks，tasks再被划分到taskgroups(逻辑)，每个task下有reader/channel/writter
+3. job的split过程主要是根据限流配置计算channel的个数，进而计算task的个数
+4. 每一个Task都由TaskGroup负责启动，Task启动后，会固定启动Reader—>Channel—>Writer的线程来完成任务同步工作
+5. 脏数据超过一定比例就直接报告job失败
+
+> datax 的 hdfs write mode 有append和nonConflict，前者不会检查直接写数据，后者会判断是否存在有fileName，有就直接报错
