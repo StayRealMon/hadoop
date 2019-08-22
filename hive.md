@@ -318,3 +318,15 @@ AS()中的数据是处理后的数据，对应insert新表的fields
 5. 脏数据超过一定比例就直接报告job失败
 
 > datax 的 hdfs write mode 有append和nonConflict，前者不会检查直接写数据，后者会判断是否存在有fileName，有就直接报错
+
+
+### 数据类型转换 ###
+
+| HIVE 数据类型(WRITE) | DataX 内部类型|PostgreSQL 数据类型(READ) |
+| -: | :-: | :- |
+| TINYINT,SMALLINT,INT,BIGINT | Long | bigint, bigserial, integer, smallint, serial |
+| FLOAT,DOUBLE | Double | double precision, money, numeric, real |
+| STRING,VARCHAR,CHAR | String | varchar, char, text, bit, inet |
+| DATE,TIMESTAMP | Date | date, time, timestamp |
+| BOOLEAN | Boolean | bool |
+| - | Bytes | bytea |
