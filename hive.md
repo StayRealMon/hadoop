@@ -2,15 +2,21 @@
 |@| 写过UDF，谈谈对UDF的理解，写UDF的目的，代码怎么写的
 > 1. UDF函数可以直接应用于select语句，对查询结构做格式化处理后，再输出内容
 > 2. 自定义UDF需要继承import org.apache.hadoop.hive.ql.exec.UDF；需要定义并实现evaluate函数
-> 3. 
+> 3. 打jar包上传，建临时函数然后select使用
 
 改造hive表后怎么进行数据一致性校验的，有没有自动化流程
 
-hbase中row key该怎么设计
 |@| 大表Join小表优化，怎么解决hive数据倾斜问题
 > 1. 分为common join 和 map join；
-> 2. common join就是普通的mr任务，输出文件为reduce个数
-> 3. map join没有reduce阶段，小表在左先读到hashtable中，left join大表，map大表读数据遍历hashtable做连接，输出文件个数为map的个数
+> 2. common join就是普通的mr任务，输出文件为reduce个数；common join的map任务中有两个表的数据(均不完整)，map的输出key为两个表join on的联合字段，value会包含表tag的信息，再shuffle被reduce拉走排序，reduce中有相同的联合key，和不同tag的value，再做join效率较低
+> 3. map join没有reduce阶段，小表在左先读到hashtable中，left join大表(防止大表读到内存中直接OOM)，map大表读数据遍历hashtable做连接，输出文件个数为map的个数
+> 4. mapjoin实际上是把小表数据添加到所有的map任务中而对性能不会产生较大影响
+
+	set hive.auto.convert.join=true;
+	hive.mapjoin.smalltable.filesize=25000000
+
+> 5. 若where条件中有不等连接，会产生笛卡儿积导致数据量倍增，而在map中提前把符合条件的key筛选出来再shuffle到reduce，提升效率
+
 
 |@| 如何解决数据倾斜(顺风车司机性别比97：3)
 > 1. reduce卡在99%(Hive中的count/distinct/groupby/join会触发shuffle)；container报OOM；task被kill
@@ -18,6 +24,7 @@ hbase中row key该怎么设计
 > 3. 使用map join提前在map端就做好join；使用combinner合并即local reduce
 > 4. 自定义partition函数指定分区策略
 > 
+> 5. hive.groupby.skewindata=true：数据倾斜时负载均衡，当选项设定为true，生成的查询计划会有两个MRJob。第一个MRJob 中，Map的输出结果集合会随机分布到Reduce中，每个Reduce做部分聚合操作，并输出结果，这样处理的结果是相同的GroupBy Key 有可能被分发到不同的Reduce中，从而达到负载均衡的目的；第二个MRJob再根据预处理的数据结果按照GroupBy Key分布到Reduce中（这个过程可以保证相同的GroupBy Key被分布到同一个Reduce中），最后完成最终的聚合操作。
 
 
 parquet(二进制方式存储的，所以是不可以直接读取的，文件中包括该文件的数据和元数据) orc textfile
@@ -99,6 +106,12 @@ parquet(二进制方式存储的，所以是不可以直接读取的，文件中
 
 	alter table table_name drop partition(col7 = 'BOY')
 删除之后col6目录之中还会有其他的col7 = 'GIRL'
+
+动态分区在静态分区之后，由hive自动判断；insert into 的时候会检查字段个数，load data 的时候不检查个数而是用null填充
+
+	set hive.exec.dynamic.partition =true（默认false）,表示开启动态分区功能
+	set hive.exec.dynamic.partition.mode = nonstrict(默认strict，不允许分区列全部是动态的),表示允许所有分区都是动态的，否则必须有静态分区字段
+
 ### 数据加载 ###
 本地加载数据相当于直接上传数据到hdfs
 
@@ -158,7 +171,7 @@ TRANSFORM()中的数据是原来表格的字段fields
 AS()中的数据是处理后的数据，对应insert新表的fields
 
 ## Hive 分桶 ##
-1. 目的是为了数据抽样(Sampling)和map-join，在表的分区下面进行分桶操作，将原来的大表根据某个字段散列到buckets中，每个bucket会有相同哈希值的字段值，便于抽样或者根据字段进行join操作
+1. 目的是为了数据抽样(Sampling)和map-join，在表的分区下面进行分桶操作，将原来的大表根据某个字段散列到buckets中，每个bucket会有相同哈希值的字段值，便于抽样或者根据字段进行join操作，看作是partition更细的粒度
 2. buckets的个数一般和reduce的个数一致**(待确认，reduce的个数如何确定，是人为设置的吗？)**。分桶之前要先把数据存在原来的表中，然后根据字段建bucket_table，from原来的table中查数据insert into到bucket_table中，这个insert过程是MR过程，将数据从block中找到再放到新的block中，每个bucket都有自己的目录
 3. 进行sampling的时候有x和y两个值需要注意，从第x个bucket开始抽y个数据，y是buckets的数量的倍数或者因子，因子的时候取多个buckets，倍数的时候取第x个bucket中的1/n数据
 
@@ -207,7 +220,7 @@ AS()中的数据是处理后的数据，对应insert新表的fields
 > 
 > (2)UDAFEvaluator下有5个方法：init()用于对中间结果进行初始化；iterate()接收传入的参数，进行迭代计算，返回值为boolean，需要计算的数据入口，类型为IntWritable或者TextWritable等可以序列化的类型；terminatePartial()没有参数，返回iterate中迭代后的数据；merge()接收terminatePartial的结果并合并中间值，返回值为boolean；teminate()返回最终的结果
 
-## order by & sort by & distribute by ##
+## order by & sort by & cluster by & distribute by ##
 ### order by ###
 > order by 会对数据进行全局排序,和oracle和mysql等数据库中的order by 效果一样，
 > 它只在一个reduce中进行所以数据量特别大的时候效率非常低。
@@ -222,12 +235,15 @@ AS()中的数据是处理后的数据，对应insert新表的fields
 
 
 ### distribute by ###
-> 用distribute by 会对指定的字段按照hashCode值对reduce的个数取模，然后将任务分配到对应的reduce中去执行
+> 用distribute by 会对指定的字段按照hashCode值对reduce的个数取模，然后将任务分配到对应的reduce中去执行。相同hash值的key会进入到相同的reduce中
 > 就是在mapreduce程序中的patition分区过程，默认根据指定key.hashCode()&Integer.MAX_VALUE%numReduce 确定处理该任务的reduce
+
+### cluster by ###
+> cluster by 除了distribute by 的功能外，还会对该字段进行排序，所以cluster by = distribute by +sort by
 
 ###Sqoop & DataX ###
 > 1. sqoop1没有server  且不和sqooo2兼容；
-> 2. 原理是将导入作业转化为只有Map任务的MR，每个map读取一片数据，并发执行
+> 2. 原理是将导入作业转化为只有Map任务的MR，每个map读取一片数据，并发执行；定制inputformatclass和outputformatclass(sqoop1.4.6 import --connect --db --pwd --query 'sql \\$CONDITIONS' --lines-terminated-by '\\012' -m 4 --target-dir)；map读取的数据个数由 nums/splits确定；打成jar包提交到集群根据配置启动map任务
 > 3. DataX会将同步作业当成一个job，一个job是一个进程
 > 4. job模块负责所有job的任务切分和task group的管理
 > 5. 切分job为task便于并发执行，task为最小工作单元

@@ -176,7 +176,7 @@ Data Node作用：①对本节点进行管理②提交自己保存的Block列表
 
 **->sort**(内部有序外部无序，根据Map生成的< K, V, P >中的K和P进行排序；排序前的< K, V, P >没有写入disk，而是在内存中的buffer缓冲区；排序结束后生成的文件按照Partition写入本地磁盘，供reduce节点拉去)
 
-**->combiner**(局部reduce，减少实际reduce的时间)
+**->combiner**(局部reduce，减少实际reduce的时间;combiner最大的作用就是减少Mapper端到Reducer端的网络数据传输;Combiner在MapReduce过程中是可选的组件，可能调用也可能不调用，可能调一次也可能调多次，所以：Combiner使用的原则是：有或没有都不能影响业务逻辑，都不能影响最终结果)
 
 **->shuffle**(默认Hash映射，注意要减少节点之间的I/O)
 

@@ -1,12 +1,20 @@
 ### 面试题 ###
 学生成绩表，把每科最高分前三名统计出来
-> SELECT a.* FROM test a
-LEFT JOIN test b ON a.subject_id=b.subject_id AND a.score<b.score
-GROUP BY a.user_id,a.subject_id,a.score HAVING COUNT(b.id)<3
-ORDER BY a.subject_id,a.score DESC
-> select tabscore.* from tabscore
-where 
-(select count(1) from tabscore tb2 where tb2.course = tabscore.course and tb2.score>tabscore.score)<2
+	SELECT a.* FROM test a
+	LEFT JOIN test b ON a.subject_id=b.subject_id AND a.score<b.score
+	GROUP BY a.user_id,a.subject_id,a.score HAVING COUNT(b.id)<3
+	ORDER BY a.subject_id,a.score DESC
+	
+	select tabscore.* from tabscore
+	where 
+	(select count(1) from tabscore tb2 where tb2.course = tabscore.course and tb2.score>tabscore.score)<2
+
+	select 
+	a.id, a.month, a.pv, 
+	sum(a.pv) over (partition by a.id order by a.month rows between unbounded preceding and current row) as sumpv, 
+	max(a.pv) over (partition by a.id order by a.month rows between unbounded preceding and current row) as maxpv 
+	from 
+	(select b.id as id, b.month as month, sum(b.pv) as pv from exercise1 b group by b.id, b.month) a;
 
 
 |@| sql有几种join，map join了解过没
