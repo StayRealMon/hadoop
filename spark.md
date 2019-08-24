@@ -3,6 +3,10 @@
 |@| flink了解哪些，它的基本架构原理
 > flink on yarn 的任务提交和任务调度 & 两种window(count||time)三种窗口方式(tumble/slide/session)以及三个time(event/ingestion/process) & watermark
 
+|@| flink中其中一个节点宕机之后，怎样恢复的
+|@| flink的checkpoint机制与恢复
+|@| flink是怎样保证exact-once的保证；为甚是要插入barrier来做checkpoint，而不是在不同算子的定时器来做checkpoint
+
 |@| 很大的m*n的数组中，每一行有序，每一列无序，如何求其topk
 |@| 短url映射长url，系统qps5000，要求设计一套完整的高可用分布式系统，设计数据库结构，负载均衡等，且要求可以1s内查询到出现次数前100的Url
 > 全局自增id做可逆哈希(发号器，单双号，自增id数字转62进制存储，lru淘汰机制，短url存在缓存数据库中有时效可延长，命中后返回302重定向可记录点击率)，lru缓存常用的
