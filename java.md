@@ -59,7 +59,7 @@
 
 
 |@| java实现多线程的方式
-> 1. 继承Thread类；实现Runnable接口；应用程序可以使用Executor框架来创建线程池
+> 1. 继承Thread类，重写run()方法，th.run()/th.start()；实现Runnable接口，先创建接口实例再传入new Thread(实例)达到创建线程的目的；应用程序可以使用Executor框架来创建线程池
 > 2. Runnable接口这种方式更受欢迎，因为这不需要继承Thread类。在应用设计中已经继承了别的对象的情况下，这需要多继承（而Java不支持多继承），只能实现接口。同时，线程池也是非常高效的，很容易实现和使用
 > 3. **就绪(Runnable)**:线程准备运行，不一定立马就能开始执行。**运行中(Running)**：进程正在执行线程的代码。**等待中(Waiting)**:线程处于阻塞的状态，等待外部的处理结束。**睡眠中(Sleeping)**：线程被强制睡眠。**I/O阻塞(Blocked on I/O)**：等待I/O操作完成。**同步阻塞(Blocked on Synchronization)**：等待获取锁。**死亡(Dead)**：线程完成了执行
 
