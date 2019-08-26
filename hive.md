@@ -333,7 +333,8 @@ AS()中的数据是处理后的数据，对应insert新表的fields
 4. 每一个Task都由TaskGroup负责启动，Task启动后，会固定启动Reader—>Channel—>Writer的线程来完成任务同步工作
 5. 脏数据超过一定比例就直接报告job失败
 
-> datax 的 hdfs write mode 有append和nonConflict，前者不会检查直接写数据，后者会判断是否存在有fileName，有就直接报错
+> 1. datax 的 hdfs write mode 有append和nonConflict，前者不会检查直接写数据，后者会判断是否存在有fileName，有就直接报错
+> 2. Sqoop通过提交只有map的mr任务到集群，每个map只读取数据的一个split，并发执行**吞吐量大**但是过多的map任务启动和销毁需要消耗时间，且过多的连接**对上游数据库造成压力**；datax解耦为reader - Channel - writer框架，**单机多线程**并发运行一次同步为一个job，分成task按照taskgroup一起并发执行，没有sqoop吞吐量大但是速度快，writemode不友好，会有脏数据和数据丢失的情况(可配置阈值)。
 
 
 ### 数据类型转换 ###
