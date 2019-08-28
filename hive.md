@@ -7,7 +7,7 @@
 改造hive表后怎么进行数据一致性校验的，有没有自动化流程
 
 |@| 大表Join小表优化，怎么解决hive数据倾斜问题
-> 1. 分为common join 和 map join；
+> 1. 分为common join 和 map join(结合buckets,即更细粒度的partition)；
 > 2. common join就是普通的mr任务，输出文件为reduce个数；common join的map任务中有两个表的数据(均不完整)，map的输出key为两个表join on的联合字段，value会包含表tag的信息，再shuffle被reduce拉走排序，reduce中有相同的联合key，和不同tag的value，再做join效率较低
 > 3. map join没有reduce阶段，小表在左先读到hashtable中，left join大表(防止大表读到内存中直接OOM)，map大表读数据遍历hashtable做连接，输出文件个数为map的个数
 > 4. mapjoin实际上是把小表数据添加到所有的map任务中而对性能不会产生较大影响
