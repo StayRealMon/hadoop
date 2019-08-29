@@ -331,11 +331,19 @@ SELECT IFNULL("00","11");	res-> 00
 select nullif(1,1)	res->null
 selectnullif(123,321);res->123
 
-## Row_number() ##
+### Row_number() ###
 Row_number() over ((partition by col1) order by col2 (asc/desc)) as rank
 先根据col1对表进行分组，再根据col2进行分组排序，返回排序编号
 如 
 
 	Row_number(partition by dept order by salary desc ) as rank
+
+为查询出来的每一行记录生成一个序号，依次排序且不会重复
+
+### rank() ###
+**rank()是跳跃排序**。rank函数考虑到了over子句中排序字段值相同的情况，相同的值回共享排名，且不影响之后的排名会出现12225578这样的排名。
+
+### dense_rank() ###
+**dense_rank()是连续排序**。dense_rank函数在生成序号时是连续的，而rank函数生成的序号有可能不连续。即相同的值共享排名之后，后面的值回紧跟着前面的排名，不会出现空缺。会出现1222333456667这样的排名
 
 返回按照部门中的工资进行降序排序的排名
