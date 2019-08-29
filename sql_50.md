@@ -16,6 +16,10 @@
 	from 
 	(select b.id as id, b.month as month, sum(b.pv) as pv from exercise1 b group by b.id, b.month) a;
 
+|@| 获取每组最新记录解决方法
+> 1. 先全排序再group，将orderby 提前到group之前
+> 2. group_concat( [DISTINCT] 要连接的字段 [Order BY 排序字段 ASC/DESC] [Separator ‘分隔符’] )，即按照时间排序的id连接，则第一个id即为最新，再对这个结果substr即可
+> 3. 临时表存储max(date)group by id，再查原表date & id 和临时表相等的字段
 
 |@| sql有几种join，map join了解过没
 > map join是相对于common join的一种优化，省去shullfe和reduce的过程
