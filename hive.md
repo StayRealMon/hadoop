@@ -17,6 +17,17 @@
 
 > 5. 若where条件中有不等连接，会产生笛卡儿积导致数据量倍增，而在map中提前把符合条件的key筛选出来再shuffle到reduce，提升效率
 
+|@| [大表×大表](https://developer.aliyun.com/article/716531?spm=a2c6h.12873581.0.0.169a187a1bv2Oa&groupCode=bigdata "大表 × 大表")
+> 1. 大右表自我join成为一张宽表
+
+	// 利用右表的唯一属性自我join
+	select id, case when type='food' then 0 else 1 as type_tag,case when
+	sale_type='city' then sales else null as sale_amount from group by id
+> 2. 大表按照主键分桶后join
+
+	create table new_left as select * from left_table cluster by id
+	create table new_right as select * from right_table cluster by id
+	select * from new_left join new_right on new_left.id=new_right.id
 
 |@| 如何解决数据倾斜(顺风车司机性别比97：3)
 > 1. reduce卡在99%(Hive中的count/distinct/groupby/join会触发shuffle)；container报OOM；task被kill
