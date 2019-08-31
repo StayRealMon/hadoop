@@ -3,6 +3,12 @@
 ##快速排序##
 找出序列的一个关键字作为枢纽，大于枢纽的元素放到枢纽之后，小于枢纽的元素放到枢纽之前，这样一趟排序将源数列分成两个子序列。然后对这两个子序列递归进行快速排序，直到每个子序列都包含一个元素为止
 
+## 直接插入排序 ##
+第一轮比较前两个数，第二轮拿第三个与前两个相比，以此类推，每一轮将第N+1个数和前面N个有序的数比较，比较之后前N+1个数有序
+
+## 选择插入排序 ##
+第一轮挑选N个数中最小的数放第一，第二轮从剩余N-1个数中找到最小的放到第二位，以此类推每次把剩余数中最小的放到前面有序队列的最后
+
 ##比较次数和初始序列##
 插排 时间复杂度与比较次数，移动次数都与初始序列有关
 快排 时间复杂度与比较次数，与移动次数都与初始序列有关
@@ -18,3 +24,34 @@
 快速排序每一趟排序结束后都将枢轴元素放到最终位置
 堆排序属于选择排序，每次都将大根堆的根结点与表尾结点交换，确定其最终位置
 二路归并排序每趟对子表进行两两归并从而得到若干个局部有序的结果，但无法确定最终位置
+
+
+## 链表 ##
+### 原地逆置 ###
+1. 节点防断裂;
+2. head为空或者仅有head
+3. pre，head，next三个指针
+	while(head!=null):
+		//记录原顺序的next
+		next = head.next; 
+		//切断原连接，将head的下一个节点由next指向pre
+		head.next = pre;
+		//pre, head, next依次往后移一位
+		pre = head; head = next; next = head.next; 
+### 判断环 ###
+1. 穷举/HashSet缓存节点唯一id信息
+2. 快慢指针，环没有终点：快2先进环追慢1，相遇即有环
+3. 求环的入口？求出2中的相遇交点，分别从head和交点node遍历，相遇的时候就是环的入口(也可仅仅考虑环中的追击相遇问题，入口为x，交点为n，slowNode走i步则fastNode走了2i步，相差的步数2i-i = k圈*N圈的大小=i)
+4. 若判断两个单链表是否相交，相交肯定有唯一尾节点，连接其中一个链表的首尾即转化为环的问题
+	while(fastNode!=null):
+		if(fastNode.next!=null)
+			fastNode = fastNode.next.next;
+		slowNode = slowNode.next;
+		if(slowNode == fastnode)
+			return TRUE;
+			//找入口
+			fastNode = slowNode；
+			while(fastNode != slowNode):
+				fastNode = fastNode.next;
+				slowNode = slowNode.next;
+			return fastNode;
