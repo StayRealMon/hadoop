@@ -1,5 +1,6 @@
 ### 面试题 ###
 学生成绩表，把每科最高分前三名统计出来
+```sql
 	SELECT a.* FROM test a
 	LEFT JOIN test b ON a.subject_id=b.subject_id AND a.score<b.score
 	GROUP BY a.user_id,a.subject_id,a.score HAVING COUNT(b.id)<3
@@ -15,6 +16,7 @@
 	max(a.pv) over (partition by a.id order by a.month rows between unbounded preceding and current row) as maxpv 
 	from 
 	(select b.id as id, b.month as month, sum(b.pv) as pv from exercise1 b group by b.id, b.month) a;
+```
 
 |@| 获取每组最新记录解决方法
 > 1. 先全排序再group，将orderby 提前到group之前
@@ -38,11 +40,13 @@ sql查询，找出互相关注的用户对数
 ## 分组排名 ##
 > 求每个班级的前两名
 
+```sql
 	select sid from 
 		(select count(sc1.SId) as cout, sc1.SId as sid from yuewen_sc as sc1 join yuewen_sc as sc2
 		on sc1.class = sc2.class and sc1.Score>sc2.Score
 		group by sc.SId) as tmp
 	where cout>1; 
+```
 
 # SQL × 50 #
 1. Student(<u>**SId**</u>,Sname,Sage,Ssex)
@@ -53,7 +57,7 @@ CId 课程编号,Cname 课程名称,TId 教师编号
 TId 教师编号,Tname 教师姓名
 4. SC(<u>**SId,CId**</u>,score)
 SId 学生编号,CId 课程编号,score 分数
-
+```sql
 		insert into Student values('01' , 'ZHAO' , '1990-01-01' , 'male');
 		insert into Student values('02' , 'QIAN' , '1990-12-21' , 'male');
 		insert into Student values('03' , 'SUN' , '1990-12-20' , 'male');
@@ -244,12 +248,16 @@ SId 学生编号,CId 课程编号,score 分数
 		COUNT(CASE WHEN sc.Score>=90 and sc.Score<100  THEN 1 ELSE NULL END)/COUNT(sc.SId) best
 		from test_SC sc GROUP BY CId ORDER BY avge DESC)res1
 		LEFT JOIN test_Course cour on cour.CId = res1.CId
-
+```
 - 查询各科成绩最高分、最低分和平均分
 
 ## Sql排名和分组排名 ##
-> select a.*, @lastType := @temp, @temp := a.type, if(@lastType = @temp,@rank:= @rank + 1,@rank := 1) as rank 
-> from test a, (select @a := 0,@temp := 0,@rank :=0) b order by type,score;
+```sql
+select a.*, @lastType := @temp, @temp := a.type, 
+	if(@lastType = @temp,@rank:= @rank + 1,@rank := 1) as rank 
+from test a, (select @a := 0,@temp := 0,@rank :=0) b 
+order by type,score;
+```
 
 ## LIMIT &OFFSET##
  LIMIT 和 OFFSET 关键字。LIMIT 后的数字代表返回几条记录，OFFSET 后的数字代表从第几条记录开始返回（第一条记录序号为0），也可理解为跳过多少条记录后开始返回.
@@ -271,17 +279,17 @@ Z是要截取字符串的长度，取值范围是正整数，若Z省略，则从
 
 ## 聚合函数group_concat(X,Y) ##
 SQLite的聚合函数group_concat(X,Y)，其中X是要连接的字段，Y是连接时用的符号，可省略，默认为逗号。此函数必须与 GROUP BY 配合使用。
-
+```sql
 	SELECT dept_no, group_concat(emp_no) AS employees
 	FROM dept_emp GROUP BY dept_no
-
+```
 ## CONCAT() ##
 MySQL的Concat函数，CONCAT(str1,str2,...) as con
 SQLLite，字符串连接用 ||
-
+```sql
 	select concat(last_name , "'" , first_name) as name from employees
 	select (last_name || "'" || first_name) as name from employees
-
+```
 ## DATEDIFF() ##
 DATEDIFF是两个日期的天数差集。
 datediff(@today,@yesterday) = 1
@@ -304,23 +312,23 @@ case a when **cond1** then **exp1** else **cond2** then **exp2** else **exp3** e
 	UPDATE salary SET sex = IF(sex = 'm','f','m');
 
 交换座位：
-
+```sql
 	select (case 
 	when mod(id,2)=1 and id = (select count(*)from seat) then id
 	when mod(id,2)=0 then id-1
 	else id+1
 	end) as id,student from seat order by id;
-
+```
 **DECODE**函数适合多值等值查询
 查询T_USER中的成绩 t_score 中成绩为65,95,73的记录显示为‘YES’否则显示"NO"。
-
+```sql
 	select u_id , u_name , u_score , decode(u_score,
        65, 'YES',
        95, 'YES',
        73, 'YES',
 	'NO') 
 	from T_USER ;
-
+```
 
 ##IF&IFNULL&NULLIF##
 **IF( expr1 , expr2 , expr3 )**
