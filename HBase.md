@@ -175,18 +175,14 @@
 4. 当HM出现单点故障，会立即选出一个新HM的作为master(zk的选举是按照投票来的ZAB协议，超过半数为leader，区别于kafka的ISR)
 
 ### HA配置 ###
-
-> 解压安装，加环境变量
-> 
-> /conf/zoo.cfg 指定datadir目录
-> 
-> server.1(serverid)=192.168.213.141:2888(有leader):3888(无主选leader用)
-> 
-> server.2=192.168.213.142:2888:3888
-> leader(单点)&follower(推选)：优先事务id，次要serverid
-> 
-> datadir下加myid文件  追加serverid
-
+```bash
+解压安装，加环境变量
+/conf/zoo.cfg 指定datadir目录
+server.1(serverid)=192.168.213.141:2888(有leader):3888(无主选leader用)
+server.2=192.168.213.142:2888:3888
+leader(单点)&follower(推选)：优先事务id，次要serverid
+datadir下加myid文件  追加serverid
+```
 ![](https://uploadfiles.nowcoder.com/images/20190529/4206388_1559142686932_2D58A1A8ECC9672B25A230C50E0F8963)
 
 
@@ -195,10 +191,10 @@ hdfs-site.xml 逻辑物理映射，ZKFC
 core-site.xml 逻辑名称为定义的字符串名称，zookeeper列表zoo.cfg & myid
 
 创建user表，包含info、data两个列族
-
-    create 'user', 'info1', 'data1'
-    create 'user', {NAME => 'info', VERSIONS => '3'}
-
+```sql
+create 'user', 'info1', 'data1'
+create 'user', {NAME => 'info', VERSIONS => '3'}
+```
 向user表中插入信息，row key为rk0001，列族info中添加gender列标示符，值为female
 
     put 'user', 'rk0001', 'info:gender', 'female'

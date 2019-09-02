@@ -20,15 +20,18 @@
 |@| [大表×大表](https://developer.aliyun.com/article/716531?spm=a2c6h.12873581.0.0.169a187a1bv2Oa&groupCode=bigdata "大表 × 大表")
 > 1. 大右表自我join成为一张宽表
 
-	// 利用右表的唯一属性自我join
-	select id, case when type='food' then 0 else 1 as type_tag,case when
-	sale_type='city' then sales else null as sale_amount from group by id
+```sql
+// 利用右表的唯一属性自我join
+select id, case when type='food' then 0 else 1 as type_tag,case when
+sale_type='city' then sales else null as sale_amount from group by id
+```
 > 2. 大表按照主键分桶后join
 
-	create table new_left as select * from left_table cluster by id
-	create table new_right as select * from right_table cluster by id
-	select * from new_left join new_right on new_left.id=new_right.id
-
+```sql
+create table new_left as select * from left_table cluster by id
+create table new_right as select * from right_table cluster by id
+select * from new_left join new_right on new_left.id=new_right.id
+```
 |@| 如何解决数据倾斜(顺风车司机性别比97：3)
 > 1. reduce卡在99%(Hive中的count/distinct/groupby/join会触发shuffle)；container报OOM；task被kill
 > 2. 先把key散列到其他k个reduce中，就不会在一个reduce中跑任务了;两阶段聚合（局部聚合+全局聚合），适用于聚合类的shuffle操作
@@ -54,53 +57,52 @@ parquet(二进制方式存储的，所以是不可以直接读取的，文件中
 ### 安装模式 ###
 内嵌模式(Derby/一个活动用户)&本地模式(MetaStore位于Hive进程中)&完全远程模式(MetaStore位于数据库中，支持多用户连接)
 ### 创建表&分区 ###
+```sql
+create [EXTERNAL] table tablename(
+col1 int,
+col2 timestamp,
+col3 string,
+col4 array<int>,
+col5 map<int,string>)
+//分区字段不能与前面定义的列名相同，加载的时候会给分区赋值(注意分区粒度大小)用于过滤导入的数据
+partitioned by (col6, int)
+row format delimited
+fields terminated by ','
+collection items terminated by '-'
+map keys terminated by ':'
+lines terminated by '\n'
+null defined as '?'
+[location 'hdfs_path'];
 
-	create [EXTERNAL] table tablename(
-	col1 int,
-	col2 timestamp,
-	col3 string,
-	col4 array<int>,
-	col5 map<int,string>)
-	//分区字段不能与前面定义的列名相同，加载的时候会给分区赋值(注意分区粒度大小)用于过滤导入的数据
-	partitioned by (col6, int)
-	row format delimited
-	fields terminated by ','
-	collection items terminated by '-'
-	map keys terminated by ':'
-	lines terminated by '\n'
-	null defined as '?'
-	[location 'hdfs_path'];
-
-
-	//建立分区
-	USE power_bike;
-	DROP TABLE IF EXISTS t_ev_ride_appraise;
-	CREATE EXTERNAL TABLE t_ev_ride_appraise
-	(
-	 guid      string      comment '唯一标识',
-	 user_id      bigint      comment '用户GUID',
-	 mobile_phone      string      comment '用户手机号',
-	 order_id      string      comment '订单唯一编号',
-	 ride_time      bigint      comment '骑行时长',
-	 ride_distance      bigint      comment '骑行距离',
-	 bike_no      string      comment '本次骑行车辆编号',
-	 city_name      string      comment '城市名称',
-	 appraise_type      bigint      comment '评价类型（1.好评，2.差评)',
-	 tag_info      string      comment '评价标签类型 json array结构',
-	 appraise_content      string      comment '评价内容',
-	 create_time      string      comment '记录创建时间',
-	 update_time      string      comment '记录更新时间'
-	)COMMENT '骑行评价'
-	PARTITIONED BY(pt string comment 'increment_partition')
-	ROW FORMAT DELIMITED FIELDS TERMINATED BY '\001'
-	COLLECTION ITEMS TERMINATED BY '\002'
-	LINES TERMINATED BY '\n'
-	STORED AS TEXTFILE
-	LOCATION '/user/data/hello_0702';	
-	LOAD DATA INPATH '/tmp/fake_data.txt' INTO TABLE t_ev_ride_appraise PARTITION(pt='20190702');
-> Location:               hdfs://master:9000/user/data/hello_0702
-> Table Type:             EXTERNAL_TABLE
-
+//建立分区
+USE power_bike;
+DROP TABLE IF EXISTS t_ev_ride_appraise;
+CREATE EXTERNAL TABLE t_ev_ride_appraise
+(
+ guid      string      comment '唯一标识',
+ user_id      bigint      comment '用户GUID',
+ mobile_phone      string      comment '用户手机号',
+ order_id      string      comment '订单唯一编号',
+ ride_time      bigint      comment '骑行时长',
+ ride_distance      bigint      comment '骑行距离',
+ bike_no      string      comment '本次骑行车辆编号',
+ city_name      string      comment '城市名称',
+ appraise_type      bigint      comment '评价类型（1.好评，2.差评)',
+ tag_info      string      comment '评价标签类型 json array结构',
+ appraise_content      string      comment '评价内容',
+ create_time      string      comment '记录创建时间',
+ update_time      string      comment '记录更新时间'
+)COMMENT '骑行评价'
+PARTITIONED BY(pt string comment 'increment_partition')
+ROW FORMAT DELIMITED FIELDS TERMINATED BY '\001'
+COLLECTION ITEMS TERMINATED BY '\002'
+LINES TERMINATED BY '\n'
+STORED AS TEXTFILE
+LOCATION '/user/data/hello_0702';	
+LOAD DATA INPATH '/tmp/fake_data.txt' INTO TABLE t_ev_ride_appraise PARTITION(pt='20190702');
+Location:               hdfs://master:9000/user/data/hello_0702
+Table Type:             EXTERNAL_TABLE
+```
 
 ### 内外部表 ###
 外部表create的时候最后加上指定路径，删除的时候只删除数据库的结构，不删除元数据
@@ -109,28 +111,30 @@ parquet(二进制方式存储的，所以是不可以直接读取的，文件中
 内外部选择根据实际业务
 
 ### 静态分区&动态分区 ###
-
+```sql
 	alter table table_name add partition(col6 = 10, col7 = 'BOY')
+```
 添加分区的时候必须建立在现有的分区之上
 删除分区的时候会把所有存在的分区全删除
 分区相当于目录
-
+```sql
 	alter table table_name drop partition(col7 = 'BOY')
+```
 删除之后col6目录之中还会有其他的col7 = 'GIRL'
 
 动态分区在静态分区之后，由hive自动判断；insert into 的时候会检查字段个数，load data 的时候不检查个数而是用null填充
-
+```sql
 	set hive.exec.dynamic.partition =true（默认false）,表示开启动态分区功能
 	set hive.exec.dynamic.partition.mode = nonstrict(默认strict，不允许分区列全部是动态的),表示允许所有分区都是动态的，否则必须有静态分区字段
-
+```
 ### 数据加载 ###
 本地加载数据相当于直接上传数据到hdfs
-
+```sql
 	load data local inpath 'file:///home/tiansir1/ad_static_feature' into table tablename' partition(col6 = 10)
-
+```
 也可以直接上传文件到/user/hive/ad_static_feature目录，然后用hive查(读检查)
 查询插入到表中，先创建表，从一个表查，再插入到另一个表
-
+```sql
 	from table_name1 
 	//查询结果插入到表
 	insert overwrite table table_name2
@@ -141,11 +145,12 @@ parquet(二进制方式存储的，所以是不可以直接读取的，文件中
 	//查询结果保存到HDFS
 	insert overwrite  '/root/data/'
 	select col1,col2
+```
 相当于MR任务，作用：1.复制表2.中间临时表3.计算结果直接存入数据表
 
 ### Streaming ###
 流式处理
-
+```sql
 	from table1
 	insert overwrite table table2
 	select TRANSFORM(col1,col2)
@@ -153,9 +158,10 @@ parquet(二进制方式存储的，所以是不可以直接读取的，文件中
 	//使用脚本命令处理，将输出结果insert到新的表
 	USING '/bin/cat'
 	where col3>10;
+```
 EXAMPLE：
 1)test.py脚本
-
+```sql
 	for line in sys.stdin:
 		line = lin.strip()
 		a,b,c,unixtime = line.split('\t')
@@ -163,21 +169,23 @@ EXAMPLE：
 		weekday = datetime.datetime.formtimestamp(float(unixtime)).isoweekday()
 		//转换后格式输出，作为流式输入
 		print ('\t'.join([a,b,c,str(weekday)]))
+```
 2)hive命令，建表
-
+```sql
 	hive>create table table1(
 	hive>col1 int,col2 int, col3 int, col4 int)
 	hive>row format 
 	hive>delimited fields terminated by '\t';
+```
 3)hive命令，转换&插入数据
-
+```sql
 	hive>add FILE test.py;
 	hive>insert overwrite table table1
 	hive>select TRANSFORM(col1,col2,col3,col4_pre)
 	hive>USING 'test.py'
 	hive>AS (col1,col2,col3,col4_pre);
 	hive>from table0
-
+```
 TRANSFORM()中的数据是原来表格的字段fields
 AS()中的数据是处理后的数据，对应insert新表的fields
 
@@ -206,7 +214,7 @@ AS()中的数据是处理后的数据，对应insert新表的fields
 > 
 > (4)select FUN(x,y) from table;
 
-
+```java
 	import org.apache.hadoop.hive.ql.exec.UDF;
 	import org.apache.hadoop.io.Text;
 	
@@ -223,7 +231,7 @@ AS()中的数据是处理后的数据，对应insert新表的fields
 	            return null;
 	    }
 	}
-
+```
 
 > Java编写UDAF，需要
 > 
@@ -268,12 +276,13 @@ AS()中的数据是处理后的数据，对应insert新表的fields
 [解决方案2](https://bupt04406.iteye.com/blog/1560796)
 
 直接修改得时候会报错
-	
+```sh
 	FAILED: Execution Error, return code 1 from org.apache.hadoop.hive.ql.exec.DDLTask. Unable to alter table. The following columns have types incompatible with the existing columns in their respective positions :
-
+```
 可以在CLI中将参数修改，这样可以强制修改字段类型忽略可能产生的问题
-
+```sql
 	set hive.metastore.disallow.incompatible.col.type.changes=false;
+```
 读检查的时候显示不出来的数据会显示null
 
  
@@ -288,15 +297,14 @@ AS()中的数据是处理后的数据，对应insert新表的fields
 2. 现有的ods.file_pg_meta数据不完整(有其他用途，冗余较大)，因此选择再重新创建一张表ods.file_pg_table_meta，专门用于这个接口查询
 3. 开发流程：数据源来自于pg业务库，需要抽取所需信息到hive中，再抽取到pg接口库，用于idata接口开发
 4. 葛大爷先在hive ods层中建好table_meta表，我在ide环境中(数仓权限)复制葛大爷的历史任务(和pg%meta表有关)，将39个pg库名和其下的表名从pg业务库中的系统表抽取到出来到table_meta中，同时要复制start和end任务，建立数据抽取前后置任务的血缘关系，每天09:06 - 09:15执行此项任务树，保证数据更新一致
-
-
+```sql
 	SELECT pu.usename as user_name, pc.relname AS table_code, coalesce(obj_description(relfilenode,'pg_class'), ' ') AS table_name from pg_user pu  join pg_class pc on pu.usesysid = pc.relowner where pc.relkind = 'r' and pc.relchecks = 0 and pu.usename not in ('postgres') and \\$CONDITIONS
-
+```
 5. data cloud环境下确认pg的库都已经成功导入到table_meta表中，就把上面的任务树部署上线；接着在葛大爷的数据开发权限下添加新的任务，目的是将table_meta表中的数据再同步到线上dev3环境pg接口库，葛大爷建好表，psql连接，查询表结构，然后from ods层中的table_meta select所需字段到bike_report库下的table_meta中
 
-
+```sql
 	select concat(user_name,'_',table_name) as table_id, db as db_name,user_name,table_name,table_comment from ods.file_pg_table_meta where db = user_name
-
+```
 6. 最后一步就是从bike_report库下的table_meta表中提取数据做成idata接口提供给产品交付就好了。选数据源定参数，查表查字段定维度，生成sql语句测试成功最后上线交付ok√
 
 ## 0708 ##

@@ -168,3 +168,24 @@ public class MainSolution {
     }
 }
 ```
+### 抢银行 ###
+环状的银行首尾不可兼得，分为两个list，`有头无尾` 和 `有尾无头`，分别当作参数传入以下的基本方法中，比较结果即可。
+```java
+import java.util.Scanner;
+public class MainSolution {
+    public static void main(String[] args){
+        Scanner sc = new Scanner(System.in);
+        String input = sc.nextLine();
+        int len = input.split(" ").length;
+        int[] values = new int[len];
+        for (int i=0;i<len;i++)
+            values[i] = Integer.parseInt(input.split(" ")[i]);
+        int[] dp = new int[len];
+        dp[0] = values[0];dp[1] = values[1];
+        for (int i=2;i<len;i++)
+            dp[i] = dp[i-2] + values[i];
+        System.out.println(Math.max(dp[len-1],dp[len-2]));
+    }
+}
+
+```
