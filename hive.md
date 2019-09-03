@@ -49,9 +49,10 @@ parquet(二进制方式存储的，所以是不可以直接读取的，文件中
 > 1. 日期函数：from_unixtime(1323308943,'yyyyMMdd')/to_date('2011-12-08 10:03:01')T-1分区同步常用，若跨月跨年在sqoop中结合case when和字符串连接实现/date_add('2012-12-08',10)和date_sub('2012-12-08',10)直接±10天/
 > 2. 条件函数：if条件select if(app_name = 'group',object_id,null) as deal_id from...变量赋值加冒号，判断直接用等号/查找第一个非空select coalesce(uuid,'') as uuid from...全空返回null/case when支持多条件判断，select case when fun1 then value1 when fun2 then value2 ... else value3 end as res from ...
 > 3. 字符串函数：length('string')/reverse('gnirts')/concat('a','b','c')concat_ws('','a','b','c')/ucase('upper')lcase('LOWER')/ltrim('  ab   c  ')rtrim('  ab   c  ')trim('  ab   c  ')/split('testString','|@|')/substr('abcde',3,2) = 'cd'  substr('abcde',3) = 'cde'/select regexp_replace('foobar', 'oo|ar', '') from... = 'fb'
-> 4. 聚合函数：Group by语句只能select和group有关的字段，不能显示多余的字段；开窗函数func(col1)over(partition by col2, col3, order by col2)可以显示与聚合无关的字段
+> 4. 聚合函数：Group by语句只能select和group有关的字段，不能显示多余的字段；开窗函数`func(col1)over(partition by col2, col3, order by col2)`可以显示与聚合无关的字段；窗口函数作用于oracle?前为分析函数接关键字`over()`，over中进行开窗对数据进行分析；按照`partition by`分组。后必须接`orderby`组内排序
 > 5. 窗口函数：**ROWS** between CURRENT ROW | UNBOUNDED PRECEDING | [num] PRECEDING AND  UNBOUNDED FOLLOWING | [num] FOLLOWING| CURRENT ROW 或者 **RANGE** between [num] PRECEDING  AND [num]FOLLOWING
-> 6. **RANGE**是在单个列上做范围限定，因此order by后只能跟一个col，若order by后有多个字段只能使用**ROW**
+> 6. **RANGE**是在单个列上做范围限定，因此order by后只能跟一个col，若order by后有多个字段只能使用 **ROW**
+> 7. **Range**看作是值偏移，是物理偏移，在某一列排序后的实际值上影响结果，实际行数可能会因为值的变动而变动；**ROW**看作是行偏移，是逻辑偏移，在排序后所在对应的行号上进行逻辑偏移，实际行数是固定的(除非前后无数据影响行数，偏移是作用于行数据的)
 ![](https://img-blog.csdn.net/20150211163916135?watermark/2/text/aHR0cDovL2Jsb2cuY3Nkbi5uZXQveGllcGVpZmVuZw==/font/5a6L5L2T/fontsize/400/fill/I0JBQkFCMA==/dissolve/70/gravity/Center)
 
 ### 安装模式 ###

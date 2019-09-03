@@ -291,26 +291,36 @@ SQLLite，字符串连接用 ||
 	select (last_name || "'" || first_name) as name from employees
 ```
 ## DATEDIFF() ##
-DATEDIFF是两个日期的天数差集。
+DATEDIFF是两个日期的天数差集，只返回天数，返回秒数用TIMESTAMPDIFF(second,mindate,maxdate)
+```sql
 datediff(@today,@yesterday) = 1
 	SELECT a.id AS 'Id' FROM Weather a JOIN Weather b ON DATEDIFF(a.RecordDate, b.RecordDate) = 1 AND a.Temperature > b.Temperature;
 
+--相差1天
+select TIMESTAMPDIFF(DAY, '2018-03-20 23:59:00', '2015-03-22 00:00:00');
+--相差49小时
+select TIMESTAMPDIFF(HOUR, '2018-03-20 09:00:00', '2018-03-22 10:00:00');
+--相差2940分钟
+select TIMESTAMPDIFF(MINUTE, '2018-03-20 09:00:00', '2018-03-22 10:00:00');
+--相差176400秒
+select TIMESTAMPDIFF(SECOND, '2018-03-20 09:00:00', '2018-03-22 10:00:00');
+```
 ## DISTINCT&GROUP BY 去重性能比较 ##
 distinct操作是IO密集型的操作
 数据量非常巨大时候，比如1000万中有300W重复数据，这时候的distinct的效率低于group by；
 对于相对重复量较小的数据量比如1000万中1万的重复量，用groupby的性能会低于distnct
-
-	select distinct salary from salaries where to_date='9999-01-01' order by salary desc;
-
+```sql
+select distinct salary from salaries where to_date='9999-01-01' order by salary desc;
+```
 
 ## CASE & DECODE ##
 case用法： 
 case a when **cond1** then **exp1** else **cond2** then **exp2** else **exp3** end
 当a满足条件cond1时， 返回exp1；当a满足条件cond2时， 返回exp2；否则 返回exp3
 交换性别：
-
-	UPDATE salary SET sex = IF(sex = 'm','f','m');
-
+```sql
+UPDATE salary SET sex = IF(sex = 'm','f','m');
+```
 交换座位：
 ```sql
 	select (case 
@@ -332,24 +342,27 @@ case a when **cond1** then **exp1** else **cond2** then **exp2** else **exp3** e
 
 ##IF&IFNULL&NULLIF##
 **IF( expr1 , expr2 , expr3 )**
+```sql
 SELECT IF(FALSE,1+1,1+2);
 select *,if(book_name='java','已卖完','有货') as product_status from book where price =50
-
+```
 **IFNULL( expr1 , expr2 )**
+```sql
 SELECT IFNULL(NULL,"11");	res-> 11
 SELECT IFNULL("00","11");	res-> 00
-
+```
 **NULLIF(expr1,expr2)**：如果两个参数相等则返回NULL，否则返回第一个参数的值expr1
+```sql
 select nullif(1,1)	res->null
 selectnullif(123,321);res->123
-
+```
 ### Row_number() ###
 Row_number() over ((partition by col1) order by col2 (asc/desc)) as rank
 先根据col1对表进行分组，再根据col2进行分组排序，返回排序编号
 如 
-
-	Row_number(partition by dept order by salary desc ) as rank
-
+```sql
+Row_number(partition by dept order by salary desc ) as rank
+```
 为查询出来的每一行记录生成一个序号，依次排序且不会重复
 
 ### rank() ###

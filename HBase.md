@@ -196,85 +196,87 @@ create 'user', 'info1', 'data1'
 create 'user', {NAME => 'info', VERSIONS => '3'}
 ```
 向user表中插入信息，row key为rk0001，列族info中添加gender列标示符，值为female
-
+```sql
     put 'user', 'rk0001', 'info:gender', 'female'
-
+```
 向user表中插入信息，row key为rk0001，列族info中添加age列标示符，值为20
-
+```sql
     put 'user', 'rk0001', 'info:age', 20
+```
 获取user表中row key为rk0001的所有信息
-
+```sql
     get 'user', 'rk0001'
-
+```
 获取user表中row key为rk0001，info列族的所有信息
-
+```sql
     get 'user', 'rk0001', 'info'
-
+```
 获取user表中row key为rk0001，列族为info，版本号最新5个的信息
-
+```sql
     get 'people', 'rk0002', {COLUMN => 'info', VERSIONS => 2}
     get 'user', 'rk0001', {COLUMN => 'info:name', VERSIONS => 5}
     get 'user', 'rk0001', {COLUMN => 'info:name', VERSIONS => 5, TIMERANGE => [1392368783980, 13923
-
+```
 获取user表中row key为rk0001，cell的值为zhangsan的信息
-
+```sql
     get 'people', 'rk0001', {FILTER => "ValueFilter(=, 'binary:图片')"}
-
+```
 查询user表中的所有信息
-
+```sql
     scan 'user'
+```
 查询user表中列族为info的信息
-
+```sql
     scan 'people', {COLUMNS => 'info'}
     scan 'user', {COLUMNS => 'info', RAW => true, VERSIONS => 5}
     scan 'persion', {COLUMNS => 'info', RAW => true, VERSIONS => 3}
-
+```
 删除user表row key为rk0001，列标示符为info:name的数据
-
+```sql
     delete 'people', 'rk0001', 'info:name'
-
+```
 删除user表row key为rk0001，列标示符为info:name，timestamp为1392383705316的数据
-
+```sql
     delete 'user', 'rk0001', 'info:name', 1392383705316
-
+```
 清空user表中的数据
-
+```sql
     truncate 'people'
-
+```
 首先停用user表（新版本不用）
-
+```sql
     disable 'user'
-
+```
 添加两个列族f1和f2
-
+```sql
     alter 'people', NAME => 'f1'
     alter 'user', NAME => 'f2'
-
+```
 启用表
-
+```sql
     enable 'user'
-
+```
 删除一个列族
-
+```sql
     alter 'user', NAME => 'f1', METHOD => 'delete' 或 alter 'user', 'delete' => 'f1'
-
+```
 添加列族f1同时删除列族f2
-
+```sql
     alter 'user', {NAME => 'f1'}, {NAME => 'f2', METHOD => 'delete'}
-
+```
 将user表的f1列族版本号改为5
-
+```sql
     alter 'people', NAME => 'info', VERSIONS => 5
-
+```
 启用表
-
+```sql
     enable 'user'
-
+```
 删除表
-
+```sql
     disable 'user'
     drop 'user'
-
+```
 
   ###disable 'user'(新版本不用)
 
