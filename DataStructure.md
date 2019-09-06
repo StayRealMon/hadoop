@@ -67,6 +67,7 @@ while(oldList.hasNext()):
 1. 节点防断裂;
 2. head为空或者仅有head
 3. pre，head，next三个指针
+4. 用栈也可以，一次for循环入栈，while not null再循环出栈即可，栈需要`import java.util.Stack;`，然后`Stack<Integer> stk = new Stack<>();`
 
 ```java
     while(head!=null):
@@ -187,6 +188,48 @@ public class MainSolution {
         for (int i=2;i<len;i++)
             dp[i] = dp[i-2] + values[i];
         System.out.println(Math.max(dp[len-1],dp[len-2]));
+    }
+}
+
+```
+
+### 两端取数 ###
+先手取数保证和最大，每次可选两端任意数
+```java
+import java.util.Scanner;
+
+public class MainSolution {
+
+    public static void main(String[] args){
+        Scanner sc = new Scanner(System.in);
+        String input = sc.nextLine();
+        int len = input.split(" ").length;
+        int[] nums = new int[len];
+        for (int i=0;i<len;i++)
+            nums[i] = Integer.parseInt(input.split(" ")[i]);
+        boolean flag = isWinner(nums);
+        System.out.println(flag?"Yes":"No");
+    }
+    public static boolean isWinner(int[] input) {
+        int sum = 0;
+        for(int i=0;i<input.length;i++)
+            sum += input[i];
+        int len = input.length;
+        int[][] res = new int[len][len];
+        for(int i = 0; i < len; i++)
+            res[i][i] = input[i];
+        for(int j = 1; j < len; j++)
+            res[j-1][j] = Math.max(res[j-1][j-1], res[j][j]);
+        for(int i = 2; i < len; i++) {
+            for (int line = 0; i + line < len; line++) {
+                //A拿左边i的时候B拿i+1或者最右的j即为value[i]+min(dp[i][i+1]，dp[i][j])
+                //A拿右边j的时候B拿j-1或者最左的i即为value[j]+min(dp[j][j-1],dp[j][i])
+                //以上两种情况再去max
+                res[line][line + i] = Math.max(input[line] + Math.min(res[line + 2][i + line], res[line + 1][i + line - 1]),
+                        input[i + line] + Math.min(res[line + 1][i + line - 1], res[line][i + line - 2]));
+            }
+        }
+        return res[0][len-1] >= (sum - res[0][len-1]);
     }
 }
 
