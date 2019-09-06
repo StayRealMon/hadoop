@@ -107,6 +107,15 @@ Action(foreach/count/collect)
 4. DF是由列式RDD组成的，由sqlContext.read(文件)或者sqlContext.sql(sql语句)。df = sqlContext.read().format().load(); df.show(); df.preintSchema(); df.registerTempTable()可以将DF注册为临时表，临时表是个指针，不是disk或者memory中的文件
 5. df和RDD互相转化**df->RDD**:Java<Row> rdd = df.javaRDD() **RDD->df**:sqlContext.createDataFrame(RDD, obj.class)利用反射机制，自定义类要实现序列化接口(节点之间传送对象的时候必须序列化，)
 
+## 消息队列特点 ##
+1. **解耦**，将一个流程加入一层数据接口拆分成两个部分，上游专注通知，下游专注处理
+2. **缓冲**，应对流量的突然上涨变更，消息队列有很好的缓冲削峰作用
+3. **异步**，上游发送消息以后可以马上返回，处理工作交给下游进行
+4. **广播**，让一个消息被多个下游进行处理
+5. **冗余**，保存处理的消息，防止消息处理失败导致的数据丢失
+
+[链接NSQ和Kafka的对比](https://www.liuin.cn/2018/07/11/%E5%88%86%E5%B8%83%E5%BC%8F%E6%B6%88%E6%81%AF%E9%98%9F%E5%88%97-NSQ-%E5%92%8C-Kafka-%E5%AF%B9%E6%AF%94/)
+
 ## Kafka ##
 分布式消息队列：系统之间解耦；峰值压力缓冲，给后续提供稳定输入；异步通信；高吞吐；存磁盘不丢失，顺序写顺序读，直接append到文件之后；分布式partition有副本
 producer&consumer&broker(处理读写请求和存储消息，通过zookeeper协调broker节点)&topic(消息队列/分类)
