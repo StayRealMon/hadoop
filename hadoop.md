@@ -6,7 +6,14 @@
 > **堆排序(快选堆基不稳定，好坏时间都是nlogn空间1)**：每次只读100个数，然后构造大/小顶堆，不需要一次读完所有数据，遍历一遍即可找到最大的top100
 
 |@| 海量数据快速查找；BitMap受最大数的影响，适用于不重复数据
-> 申请一个a[1+N/32]长的bit数组，将N个数散列到1+N/32个数组下标中(0-31,32-63....)一个int整数就是4字节32bit，利用移位将32bit中Ni所在的位置置为1，23457可转化为00111101，最后按照顺序把bit位为1的位置输出就ok了
+> 申请一个a[1+N/32]长的bit数组，将N个数散列到1+N/32个数组下标中(0-31,32-63....)一个int整数就是4字节32bit，利用移位将32bit中$N_i$所在的位置置为1，23457可转化为00111101，最后按照顺序把bit位为1的位置输出就ok了
+
+|@|海量数据查不存在，1-100w的连续id数据无序存放，有两个id丢失，快速查找
+>1. 先想到的是mr，可以对1-100w求和，然后对文件求和，两个和的差就是丢失记录的和，根据这个和再去找丢失的两个id，还是没有解决问题
+>2. 之后想到的是bitmap，入数组再输出比特位为0的id即为丢失id
+>3. 最笨的方法就是先排序再遍历，一定没问题，最差也是log(n)
+>4. lqy说了一个方便的排序算法可以了解一下，基于交换的思想：先查下标为0的位置的数，若a[0]=0则查a[1]是否为1，若a[1]!=1，则将a[1]位置上的数i交换到a[i]，a[i]上的数交换到a[1]，这样0-n走一遍之后就达到了排序的目的
+
 > 
 > 用于快速查询(Bloom Filter)1是否在50e，也可用作快速去重(2bit代表3种状态)
 > 
@@ -14,9 +21,9 @@
 
 
 |@| 序列化 和 反序列化
-把**对象转换为字节序列**的过程称为对象的序列化，POJO类实现Serializable接口；把**字节序列恢复为对象**的过程称为对象的反序列化
-> 1. 作为一种**通信数据格式**：节约带宽(无论是何种类型的数据，都会以二进制序列的形式在网络上传送)
-> 2. 作为一种**持久化格式**：永久存储(离开内存空间，入住物理硬盘)
+把 **对象转换为字节序列**的过程称为对象的序列化，POJO类实现Serializable接口；把**字节序列恢复为对象**的过程称为对象的反序列化
+> 1. 作为一种 **通信数据格式**：节约带宽(无论是何种类型的数据，都会以二进制序列的形式在网络上传送)
+> 2. 作为一种 **持久化格式**：永久存储(离开内存空间，入住物理硬盘)
 > 3. 作为一种拷贝、克隆(clone)机制：将对象序列化到内存的缓存区中。然后通过反序列化，可以得到一个对已存对象进行深拷贝的新对象
 > 4. transient避免被序列化，static变量不属于对象不会被序列化
 
@@ -71,11 +78,11 @@ Name Node作用：
 > ④与client进行通信
 
 NN所维护的信息：元数据信息(文件的时间大小权限所有者等)；**DN**的位置和状态；**Block**的位置和状态；维护虚拟的目录树；
-NN的**Block块信息来自于DN的心跳汇报**
-NN维护的信息基于内存，存在**单点故障**问题。通过保存edit_log&fsimage到disk以实现**持久化**
+NN的 **Block块信息来自于DN的心跳汇报**
+NN维护的信息基于内存，存在**单点故障**问题。通过保存edit_log&fsimage到disk以实现 **持久化**
 SecNN首次备份从NN获取edit_log和fsimage(两个文件都需要)，以后只获取edit_log即可。
 > SecNN先停用NN的edit_log，NN先将新的log存至edit_log_new
-> SecNN合并拿来的edit_log和**本地的fsimage**为新的fsimage并返回新的fsimage给NN
+> SecNN合并拿来的edit_log和 **本地的fsimage**为新的fsimage并返回新的fsimage给NN
 > NN将edit_log_new重命名为edit_log
 
 首次format后启动NN时，生成空白fsimage，执行edit_log
@@ -85,7 +92,7 @@ SecNN首次备份从NN获取edit_log和fsimage(两个文件都需要)，以后�
 
 ## Data Node ##
 Data Node作用：①对本节点进行管理②提交自己保存的Block列表。**一写多读**，向NN心跳汇报状态
-> 文件线性切割成块(Block)以字节为单位，有**偏移量**(offset)和**位置信息**。块的第一个字节面向于源文件的下标即为偏移量
+> 文件线性切割成块(Block)以字节为单位，有**偏移量**(offset)和 **位置信息**。块的第一个字节面向于源文件的下标即为偏移量
 > 
 > Block的大小需要考虑硬盘的I/O量
 > 
@@ -99,28 +106,28 @@ Data Node作用：①对本节点进行管理②提交自己保存的Block列表
 ### HA ###
 1. 来自于DN汇报的信息可以在两台NN中保持一致
 2. 但是来自于Client的请求操作日志只和工作的一台NN进行连接，有可能会因为可用性导致不一致性
-3. 可以利用Linux的**NFS**网络文件系统保持日志文件的一致性
-4. 也可以加若干个**JN**专门存储操作日志，供两个NN同步
-5. ZKFC(DFSZKFailoverController)是一个JVM进程，一边监控NN的健康状态，和NN之间没有网络I/O，属于同一个节点；ZKFC另一边**去ZK某一树目录下抢一个锁**创建一个节点，抢到锁的NN变为actived，其余的standby
+3. 可以利用Linux的 **NFS**网络文件系统保持日志文件的一致性
+4. 也可以加若干个 **JN**专门存储操作日志，供两个NN同步
+5. ZKFC(DFSZKFailoverController)是一个JVM进程，一边监控NN的健康状态，和NN之间没有网络I/O，属于同一个节点；ZKFC另一边 **去ZK某一树目录下抢一个锁**创建一个节点，抢到锁的NN变为actived，其余的standby
 6. 所有的standby向ZK进行注册，actived失败的时候，ZKFC删掉节点，**删除事件触发注册方法**，再次进行争抢锁
-7. 若actived节点没有失败，但是JVM进程ZKFC断了，ZK的**session机制**，连接失败超时的时候删掉目录下的节点供再次争抢，原actived降为standby，抢到锁的升级actived
+7. 若actived节点没有失败，但是JVM进程ZKFC断了，ZK的 **session机制**，连接失败超时的时候删掉目录下的节点供再次争抢，原actived降为standby，抢到锁的升级actived
 
-> 逻辑集群到物理集群的**映射**
+> 逻辑集群到物理集群的 **映射**
 > **journalNode的位置信息**描述配置
-> 故障切换的**代理方法**和免密钥配置
+> 故障切换的 **代理方法**和免密钥配置
 
-1.  同一个物理cluster集群，要先启动**journalNode**(供新的HA集群NN1格式化的edit_log和fsimage存新的集群日志)
+1.  同一个物理cluster集群，要先启动 **journalNode**(供新的HA集群NN1格式化的edit_log和fsimage存新的集群日志)
 
 		hadoop-daemon.sh start journalnode
 
-2.  然后**format**NN1(日志信息保存到JNN)
+2.  然后 **format**NN1(日志信息保存到JNN)
 
 		hdfs namenode -format
-3.  接着**standby启动**NN2，但是不需要format，会根据NN1存于JournalNode的日志信息进行同步，此时处于standby状态，NN2会同步已经格式化的所有DN信息(同步完之后不会启动而是立即shutdown，启动需要在NN1执行start-dfs.sh命令，和DN一起启动)
+3.  接着 **standby启动**NN2，但是不需要format，会根据NN1存于JournalNode的日志信息进行同步，此时处于standby状态，NN2会同步已经格式化的所有DN信息(同步完之后不会启动而是立即shutdown，启动需要在NN1执行start-dfs.sh命令，和DN一起启动)
 
 		hdfs namenode --help(-bootstrapStandby)
 
-4. 若是首次安装ZK集群，需要先**启动zookeeper的节点**，进行**格式化**，建立空的目录树，用于ZKFC进行锁的争抢(若已经进行过格式化则跳过此步骤，直接执行start-dfs.sh命令启动集群即可)
+4. 若是首次安装ZK集群，需要先 **启动zookeeper的节点**，进行 **格式化**，建立空的目录树，用于ZKFC进行锁的争抢(若已经进行过格式化则跳过此步骤，直接执行start-dfs.sh命令启动集群即可)
 		hdfs zkfc -formatZK
 
 > 先启动JNs，供NN1格式化，存储最新的日志
@@ -142,7 +149,7 @@ Data Node作用：①对本节点进行管理②提交自己保存的Block列表
 ![](https://uploadfiles.nowcoder.com/images/20190630/4206388_1561901039117_B850DAAACB6A96B16D8C4F8DE4CE5651)
 
 ### Federation ###
-1. 一个集群有两个或者多个NN处于actived状态，但是两个NN获得到的DN汇报的block信息是不一样的，即**两个NN维护的目录树是不一样的**，虽然cluster是同一个，但是NN是隔离的，不能互相访问对方的数据。若第三方想要获取两个NN的目录树结构，得到cluster所有数据
+1. 一个集群有两个或者多个NN处于actived状态，但是两个NN获得到的DN汇报的block信息是不一样的，即 **两个NN维护的目录树是不一样的**，虽然cluster是同一个，但是NN是隔离的，不能互相访问对方的数据。若第三方想要获取两个NN的目录树结构，得到cluster所有数据
 
 > 先启动journalnode，format第一个NN，启动ZK，format ZK，最后启动整个集群
 
