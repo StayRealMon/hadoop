@@ -242,9 +242,15 @@ AM以作业为单位，负载到不同的节点进行作业调度，避免单点
 > 2. 手动设置的大小大于default_num时候才生效；
 > 3. 每个task处理文件的大小splitSize大于blockSize时候也会生效splitSize =   Math.max(minSize, Math.min(maxSize, blockSize))
 > 4. 每一个map处理的数据是不能跨越文件的，max_map_num <= input_file_num
+> 5. 如果想减小map个数，则设置mapred.min.split.size 为一个较大的值；如果想增大map个数，则设置mapred.min.split.size 为一个较小的值
+
+### reduce 数量的确定 ###
+>1. 直接通过参数指定 `set mapred.reduce.tasks = 10` 
+>2. 指定每个reducer 处理的最大数量 `set hive.exec.reducers.bytes.per.reducer = 500000000 (500M)` 
+>3. 总数据量/每个Reducer最大数据量  > Reducer 数量，会对Reducer进行排队
 
 ##WordCount##
-
+```java
 	import org.apache.hadoop.conf.Configuration;
 	import org.apache.hadoop.fs.Path;
 	import org.apache.hadoop.io.IntWritable;
@@ -362,7 +368,7 @@ AM以作业为单位，负载到不同的节点进行作业调度，避免单点
 	    }
 	
 	}
-
+```
 
 ## 面试问题 ##
 ### 超级大表join超级大表 ###
