@@ -234,3 +234,36 @@ public class MainSolution {
 }
 
 ```
+
+## 二叉树 ##
+```java
+##定义二叉树
+class Node{
+    Node left;
+    Node right;
+    int val;
+    public void Node(int value){
+        this.val = value;
+    }
+}
+```
+### 广度优先遍历BFS-Queue | 用于计算深度高度 ###
+1. 递归方法root先入队；判断root是否有子节点，没有直接出队，有就入左入右递归入队最后集体出队即可
+2. 非递归方法就写循环，node = queue.remove();while(node.left != null){}
+```java
+##递归实现
+public void BFSRecur(Node root){
+    if (root == null) {
+        return;
+    }Queue<Node> queue = new Queue()<>;
+    queue.add(root);
+    while(queue!=null){
+        Node node = new Node();
+    }
+}
+
+```
+### 深度优先遍历DFS-Stack | 用于前中后序遍历 ###
+1. 递归方法root入栈；判断root是否有子节点，没有直接出栈，有就递归入右入左最后出栈左树再右树
+2. 非递归方法判断左树不为空再判断右树不为空
+
