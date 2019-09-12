@@ -263,7 +263,11 @@ public void BFSRecur(Node root){
 }
 
 ```
+
 ### 深度优先遍历DFS-Stack | 用于前中后序遍历 ###
 1. 递归方法root入栈；判断root是否有子节点，没有直接出栈，有就递归入右入左最后出栈左树再右树
 2. 非递归方法判断左树不为空再判断右树不为空
 
+## 分糖果 ##
+### Rating高的多于Rating低的 ###
+初始化最终数组res[len]为1；一次循环判断rate[i+1]是否大于rate[i]，成立则res[i]+=1，否则res[i]保持初始值为1；二次循环判断rate[i-1]是否大于rate[i]，成立则res[i-1]
