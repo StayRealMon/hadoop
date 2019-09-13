@@ -248,17 +248,31 @@ class Node{
 }
 ```
 ### 广度优先遍历BFS-Queue | 用于计算深度高度 ###
-1. 递归方法root先入队；判断root是否有子节点，没有直接出队，有就入左入右递归入队最后集体出队即可
-2. 非递归方法就写循环，node = queue.remove();while(node.left != null){}
+1. 非递归方法root先入队；判断root是否有子节点，没有直接出队，有就入左入右
+2. 递归方法？？？
 ```java
 ##递归实现
-public void BFSRecur(Node root){
-    if (root == null) {
+public Node BFSRecur(Node root){
+    if (root.left==null && root.right==null) 
+        return root;
+    else if () {
+        
+    }
+}
+
+##非递归实现
+public void BFS(Node root){
+    if (root == null)
         return;
-    }Queue<Node> queue = new Queue()<>;
+    Queue<Node> queue = new Queue()<>;
     queue.add(root);
-    while(queue!=null){
+    while(queue.size()!=0){
         Node node = new Node();
+        node = queue.remove();
+        if (node.left!=null) 
+            queue.add(node.left);
+        if (node.right!=null) 
+            queue.add(node.right);
     }
 }
 
@@ -267,7 +281,58 @@ public void BFSRecur(Node root){
 ### 深度优先遍历DFS-Stack | 用于前中后序遍历 ###
 1. 递归方法root入栈；判断root是否有子节点，没有直接出栈，有就递归入右入左最后出栈左树再右树
 2. 非递归方法判断左树不为空再判断右树不为空
+```java
+##递归实现
+public Node DFSRecur(Node root){
+    if (root.left==null && root.right==null)
+        return root;
+    //先遍历左子树
+    if (root.left!=null)
+        return DFSRecur(root.left)
+    //再遍历右子树
+    if (root.right!=null) 
+        return DFSRecur(root.right)
+}
+##非递归实现
+public void DFS(Node root){
+    if (root == null ) 
+        return root;
+    Stack<Node> stack = new Stack<>();
+    stack.push(root);
+    while(stack.size()!=0){
+        Node node = stack.pop();
+        if (node.right != null)
+            stack.push(node.right);
+        if (node.left !=null)
+            stack.push(node.left);
+    }
+}
+```
 
 ## 分糖果 ##
 ### Rating高的多于Rating低的 ###
-初始化最终数组res[len]为1；一次循环判断rate[i+1]是否大于rate[i]，成立则res[i]+=1，否则res[i]保持初始值为1；二次循环判断rate[i-1]是否大于rate[i]，成立则res[i-1]
+初始化最终数组res[len]为1；一次循环判断rate[i+1]是否大于rate[i]，成立则res[i]+=1，否则res[i]保持初始值为1；二次循环判断rate[i-1]是否大于rate[i]，成立则res[i-1]=Math.max(res[i-1],res[i])
+```java
+public static void main(String[] args){
+        Scanner sc = new Scanner(System.in);
+        String input = sc.nextLine();
+        int len = input.split(" ").length;
+        int[] rating = new int[len];
+        for (int i =0;i<len;i++)
+            rating[i] = Integer.parseInt(input.split(" ")[i]);
+        int[] res = new int[len];
+        //初始化为1
+        for (int i =0;i<len;i++)
+            res[i] = 1;
+        //第一次循环把递增序列都值都加一
+        for (int i=0;i<len-1;i++)
+            if (rating[i+1]>rating[i])
+                res[i+1] = res[i]+1;
+        //第二次循环把递减序列都值逆向加一，取原值和加一后的最大值作为最终值
+        for (int i=len-1;i>0;i--)
+            if (rating[i-1]>rating[i])
+                res[i-1] = Math.max(res[i]+1,res[i-1]);
+        for (int i=0;i<len;i++)
+            System.out.println("res["+i+"] is :\t"+res[i]);
+    }
+```
