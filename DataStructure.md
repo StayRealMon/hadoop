@@ -53,13 +53,13 @@ quickSort(list[],low,high):
 ```java
 while(oldList.hasNext()):
     //赋值给一个新节点
-    Node new = oldList.hasNext();
+    Node newNode = oldHead.next;
     //记录头插新链表的链接信息
-    next = head.next;
+    newNode.next = newHead.next;
     //头插新链表的新链接
-    new.next = next;
+    newHead.next = newNode;
     //新节点连到头后面
-    head.next = new;
+    oldHead = oldHead.next;
 
 ```
 
@@ -193,6 +193,58 @@ public class MainSolution {
 
 ```
 
+## 最长公共子序列LCS(仅有长度，可优化到一维数组) ##
+```java
+public static void main(String[] args){
+        Scanner sc = new Scanner(System.in);
+        String firstWord = sc.nextLine();
+        String secondWord = sc.nextLine();
+        char[] firstList = firstWord.toCharArray();
+        char[] secondList = secondWord.toCharArray();
+        int firstLen = firstList.length;
+        int secondLen = secondList.length;
+        int[][] grid = new int[firstLen][secondLen];
+        int[][] dp = new int[firstLen][secondLen];
+        for (int i=0;i<firstLen;i++)
+            for (int j=0;j<secondLen;j++)
+                if (firstList[i] == secondList[j])
+                    grid[i][j] = 1;
+                else
+                    grid[i][j] = 0;
+        System.out.println("## doubleArrToString(grid) ##");
+        doubleArrToString(grid);
+        dp[0] = grid[0];
+        for (int i=0;i<firstLen;i++)
+            dp[i][0] = grid[i][0];
+        for (int i=1;i<firstLen;i++) {
+            for (int j = 1; j < secondLen; j++) {
+                dp[i][j] = grid[i][j]+dp[i-1][j-1];
+            }
+        }
+        System.out.println("\n## doubleArrToString(dp) ##");
+        doubleArrToString(dp);
+        int res = 0;
+        //最后一行的length即为列数，遍历最后一行
+        for (int i=0;i<dp[firstLen-1].length;i++)
+            res = Math.max(dp[firstLen-1][i],res);
+        //整个dp数组的length即为行数，遍历最后一列
+        for (int i=0;i<dp.length;i++)
+            res = Math.max(dp[i][secondLen-1],res);
+        System.out.println("Max Result is : "+res);
+    }
+
+    public static void doubleArrToString(int[][] arr){
+        int x = arr.length;
+        int y = arr[0].length;
+        for (int i=0;i<x;i++) {
+            for (int j = 0; j < y; j++) {
+                System.out.print(arr[i][j]+"\t");
+            }
+            System.out.println(" ");
+        }
+    }
+```
+
 ### 两端取数 ###
 先手取数保证和最大，每次可选两端任意数
 ```java
@@ -247,6 +299,7 @@ class Node{
     }
 }
 ```
+
 ### 广度优先遍历BFS-Queue | 用于计算深度高度 ###
 1. 非递归方法root先入队；判断root是否有子节点，没有直接出队，有就入左入右
 2. 递归方法？？？
@@ -307,6 +360,41 @@ public void DFS(Node root){
             stack.push(node.left);
     }
 }
+```
+
+### 朋友圈 lt547 ###
+```java
+// 递归方法
+public static void main(String[] args){
+        Scanner sc = new Scanner(System.in);
+        int dim = Integer.parseInt(sc.nextLine());
+        int[][] metrics = new int[dim][dim];
+        int res = 0;
+        for (int i=0;i<dim;i++){
+            String tmpLine = sc.nextLine();
+            for (int j=0;j<dim;j++)
+                metrics[i][j] = Integer.parseInt(tmpLine.split(" ")[j]);
+        }for (int i = 0;i<metrics.length;i++)
+            if (dfsRecur(metrics,i))
+                res++;
+        System.out.println(res);
+    }
+
+    public static boolean dfsRecur(int[][] met, int cur){
+        boolean flag = false;
+        for (int i=0;i<met.length;i++){
+            // 判断cur这一行的第i列是否为0，即cur和第i个人第关系是否被遍历到
+            // 虽然for循环是在行的纬度上，但是行列相等不影响结果
+            if (met[cur][i]==0)
+                continue;
+            // 标记为已遍历
+            met[cur][i] = 0;
+            met[i][cur] = 0;
+            flag = true;
+            dfsRecur(met,i);
+        }
+        return flag;
+    }
 ```
 
 ## 分糖果 ##

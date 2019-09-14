@@ -446,7 +446,7 @@ wait() 与  notify/notifyAll()
 
 
 ## OJ ##
-
+```java
 	import java.util.*;
 	 
 	public class Main {
@@ -482,3 +482,30 @@ wait() 与  notify/notifyAll()
 	        System.out.println(ans);
 	    }
 	}
+```
+## HashMap 三种方式打印
+```java
+public static void main(String[] args){
+        Scanner sc = new Scanner(System.in);
+        String input = sc.nextLine();
+        int len = input.split(" ").length;
+        HashMap<String,Integer> hMap = new HashMap<>();
+        for (int i =0 ;i<len;i++)
+            if (hMap.containsKey(input.split(" ")[i]))
+                hMap.put(input.split(" ")[i],hMap.get(input.split(" ")[i])+1);
+            else
+                hMap.put(input.split(" ")[i],1);
+        //默认调用toString
+        System.out.println(hMap);
+        System.out.println("############");
+        //先把Key放到集合中，遍历集合key取value
+        Set<String> keySet = hMap.keySet();
+        for (String curKey:keySet)
+            System.out.println(curKey+":"+hMap.get(curKey));
+        System.out.println("############");
+        //使用entrySet，效率最高
+        Set<Map.Entry<String,Integer>> entrySet = hMap.entrySet();
+        for (Map.Entry<String,Integer> me :entrySet)
+            System.out.println(me.getKey()+":"+me.getValue());
+    }
+```
