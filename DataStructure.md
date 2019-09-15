@@ -1,7 +1,41 @@
+
+<!-- MarkdownTOC -->
+
+- [排序](#%E6%8E%92%E5%BA%8F)
+    - [快速排序](#%E5%BF%AB%E9%80%9F%E6%8E%92%E5%BA%8F)
+    - [直接插入排序](#%E7%9B%B4%E6%8E%A5%E6%8F%92%E5%85%A5%E6%8E%92%E5%BA%8F)
+    - [选择插入排序](#%E9%80%89%E6%8B%A9%E6%8F%92%E5%85%A5%E6%8E%92%E5%BA%8F)
+    - [比较次数和初始序列](#%E6%AF%94%E8%BE%83%E6%AC%A1%E6%95%B0%E5%92%8C%E5%88%9D%E5%A7%8B%E5%BA%8F%E5%88%97)
+    - [确定最终位置](#%E7%A1%AE%E5%AE%9A%E6%9C%80%E7%BB%88%E4%BD%8D%E7%BD%AE)
+    - [链表](#%E9%93%BE%E8%A1%A8)
+        - [头插法](#%E5%A4%B4%E6%8F%92%E6%B3%95)
+        - [原地逆置](#%E5%8E%9F%E5%9C%B0%E9%80%86%E7%BD%AE)
+        - [判断环](#%E5%88%A4%E6%96%AD%E7%8E%AF)
+- [动态规划](#%E5%8A%A8%E6%80%81%E8%A7%84%E5%88%92)
+    - [二维数组最短路径](#%E4%BA%8C%E7%BB%B4%E6%95%B0%E7%BB%84%E6%9C%80%E7%9F%AD%E8%B7%AF%E5%BE%84)
+    - [类二叉树的最短路径](#%E7%B1%BB%E4%BA%8C%E5%8F%89%E6%A0%91%E7%9A%84%E6%9C%80%E7%9F%AD%E8%B7%AF%E5%BE%84)
+    - [抢银行](#%E6%8A%A2%E9%93%B6%E8%A1%8C)
+    - [最长公共子序列LCS\(仅有长度，可优化到一维数组\)](#%E6%9C%80%E9%95%BF%E5%85%AC%E5%85%B1%E5%AD%90%E5%BA%8F%E5%88%97lcs%E4%BB%85%E6%9C%89%E9%95%BF%E5%BA%A6%EF%BC%8C%E5%8F%AF%E4%BC%98%E5%8C%96%E5%88%B0%E4%B8%80%E7%BB%B4%E6%95%B0%E7%BB%84)
+    - [两端取数](#%E4%B8%A4%E7%AB%AF%E5%8F%96%E6%95%B0)
+- [二叉树](#%E4%BA%8C%E5%8F%89%E6%A0%91)
+    - [广度优先遍历BFS-Queue | 用于计算深度高度](#%E5%B9%BF%E5%BA%A6%E4%BC%98%E5%85%88%E9%81%8D%E5%8E%86bfs-queue-%7C-%E7%94%A8%E4%BA%8E%E8%AE%A1%E7%AE%97%E6%B7%B1%E5%BA%A6%E9%AB%98%E5%BA%A6)
+    - [深度优先遍历DFS-Stack | 用于前中后序遍历](#%E6%B7%B1%E5%BA%A6%E4%BC%98%E5%85%88%E9%81%8D%E5%8E%86dfs-stack-%7C-%E7%94%A8%E4%BA%8E%E5%89%8D%E4%B8%AD%E5%90%8E%E5%BA%8F%E9%81%8D%E5%8E%86)
+    - [朋友圈 lt547](#%E6%9C%8B%E5%8F%8B%E5%9C%88-lt547)
+    - [分糖果](#%E5%88%86%E7%B3%96%E6%9E%9C)
+        - [Rating高的多于Rating低的](#rating%E9%AB%98%E7%9A%84%E5%A4%9A%E4%BA%8Erating%E4%BD%8E%E7%9A%84)
+
+<!-- /MarkdownTOC -->
+
+
+<a id="%E6%8E%92%E5%BA%8F"></a>
 # 排序 #
 ![](https://images2017.cnblogs.com/blog/1303641/201801/1303641-20180124091639006-2029462359.png)
 
-##快速排序##
+
+
+<a id="%E5%BF%AB%E9%80%9F%E6%8E%92%E5%BA%8F"></a>
+## 快速排序 ##
+
 找出序列的一个关键字作为枢纽，大于枢纽的元素放到枢纽之后，小于枢纽的元素放到枢纽之前，这样一趟排序将源数列分成两个子序列。然后对这两个子序列递归进行快速排序，直到每个子序列都包含一个元素为止
 ```java
 quickSort(list[],low,high):
@@ -25,12 +59,15 @@ quickSort(list[],low,high):
     quickSort(list[],end+1,high);
 ```
 
+<a id="%E7%9B%B4%E6%8E%A5%E6%8F%92%E5%85%A5%E6%8E%92%E5%BA%8F"></a>
 ## 直接插入排序 ##
 第一轮比较前两个数，第二轮拿第三个与前两个相比，以此类推，每一轮将第N+1个数和前面N个有序的数比较，比较之后前N+1个数有序
 
+<a id="%E9%80%89%E6%8B%A9%E6%8F%92%E5%85%A5%E6%8E%92%E5%BA%8F"></a>
 ## 选择插入排序 ##
 第一轮挑选N个数中最小的数放第一，第二轮从剩余N-1个数中找到最小的放到第二位，以此类推每次把剩余数中最小的放到前面有序队列的最后
 
+<a id="%E6%AF%94%E8%BE%83%E6%AC%A1%E6%95%B0%E5%92%8C%E5%88%9D%E5%A7%8B%E5%BA%8F%E5%88%97"></a>
 ##比较次数和初始序列##
 1. 插排 时间复杂度与比较次数，移动次数都与初始序列有关
 2. 快排 时间复杂度与比较次数，与移动次数都与初始序列有关
@@ -40,6 +77,7 @@ quickSort(list[],low,high):
 
 > 一堆（堆排序）乌龟（归并排序）选（选择排序）基（基数排序——算法复杂度与数组的初始状态无关
 
+<a id="%E7%A1%AE%E5%AE%9A%E6%9C%80%E7%BB%88%E4%BD%8D%E7%BD%AE"></a>
 ## 确定最终位置 ##
 1. 简单选择排序每次选择未排序列中的最小元素放入其最终位置
 2. 希尔排序每次是对划分的子表进行排序，得到局部有序的结果，所以不能保证每一趟排序结束都能确定一个元素的最终位置
@@ -48,7 +86,9 @@ quickSort(list[],low,high):
 5. 二路归并排序每趟对子表进行两两归并从而得到若干个局部有序的结果，但无法确定最终位置
 
 
+<a id="%E9%93%BE%E8%A1%A8"></a>
 ## 链表 ##
+<a id="%E5%A4%B4%E6%8F%92%E6%B3%95"></a>
 ### 头插法 ###
 ```java
 while(oldList.hasNext()):
@@ -63,6 +103,7 @@ while(oldList.hasNext()):
 
 ```
 
+<a id="%E5%8E%9F%E5%9C%B0%E9%80%86%E7%BD%AE"></a>
 ### 原地逆置 ###
 1. 节点防断裂;
 2. head为空或者仅有head
@@ -79,6 +120,7 @@ while(oldList.hasNext()):
         pre = head; head = next; next = head.next; 
 ```
 
+<a id="%E5%88%A4%E6%96%AD%E7%8E%AF"></a>
 ### 判断环 ###
 1. 穷举/HashSet缓存节点唯一id信息
 2. 快慢指针，环没有终点：快2先进环追慢1，相遇即有环
@@ -100,12 +142,14 @@ while(oldList.hasNext()):
 			return fastNode;
 ```
 
-## 动态规划 ##
+<a id="%E5%8A%A8%E6%80%81%E8%A7%84%E5%88%92"></a>
+# 动态规划 #
 最优子问题/动态转移方程/边界->进阶背包问题
 
 青蛙跳台阶/拿硬币等问题啊，数值可能过大，数组可以用`Long[]`代替`int[]`
 
-### 二维数组最短路径 ###
+<a id="%E4%BA%8C%E7%BB%B4%E6%95%B0%E7%BB%84%E6%9C%80%E7%9F%AD%E8%B7%AF%E5%BE%84"></a>
+## 二维数组最短路径 ##
 ```java
     import java.util.Scanner;
     public class MainSolution {
@@ -140,7 +184,8 @@ while(oldList.hasNext()):
         }
     }
 ```
-### 类二叉树的最短路径 ###
+<a id="%E7%B1%BB%E4%BA%8C%E5%8F%89%E6%A0%91%E7%9A%84%E6%9C%80%E7%9F%AD%E8%B7%AF%E5%BE%84"></a>
+## 类二叉树的最短路径 ##
 ```java
 import java.util.Scanner;
 public class MainSolution {
@@ -171,7 +216,8 @@ public class MainSolution {
     }
 }
 ```
-### 抢银行 ###
+<a id="%E6%8A%A2%E9%93%B6%E8%A1%8C"></a>
+## 抢银行 ##
 环状的银行首尾不可兼得，分为两个list，`有头无尾` 和 `有尾无头`，分别当作参数传入以下的基本方法中，比较结果即可。
 ```java
 import java.util.Scanner;
@@ -193,6 +239,7 @@ public class MainSolution {
 
 ```
 
+<a id="%E6%9C%80%E9%95%BF%E5%85%AC%E5%85%B1%E5%AD%90%E5%BA%8F%E5%88%97lcs%E4%BB%85%E6%9C%89%E9%95%BF%E5%BA%A6%EF%BC%8C%E5%8F%AF%E4%BC%98%E5%8C%96%E5%88%B0%E4%B8%80%E7%BB%B4%E6%95%B0%E7%BB%84"></a>
 ## 最长公共子序列LCS(仅有长度，可优化到一维数组) ##
 ```java
 public static void main(String[] args){
@@ -245,7 +292,8 @@ public static void main(String[] args){
     }
 ```
 
-### 两端取数 ###
+<a id="%E4%B8%A4%E7%AB%AF%E5%8F%96%E6%95%B0"></a>
+## 两端取数 ##
 先手取数保证和最大，每次可选两端任意数
 ```java
 import java.util.Scanner;
@@ -287,7 +335,8 @@ public class MainSolution {
 
 ```
 
-## 二叉树 ##
+<a id="%E4%BA%8C%E5%8F%89%E6%A0%91"></a>
+# 二叉树 #
 ```java
 ##定义二叉树
 class Node{
@@ -300,7 +349,8 @@ class Node{
 }
 ```
 
-### 广度优先遍历BFS-Queue | 用于计算深度高度 ###
+<a id="%E5%B9%BF%E5%BA%A6%E4%BC%98%E5%85%88%E9%81%8D%E5%8E%86bfs-queue-%7C-%E7%94%A8%E4%BA%8E%E8%AE%A1%E7%AE%97%E6%B7%B1%E5%BA%A6%E9%AB%98%E5%BA%A6"></a>
+## 广度优先遍历BFS-Queue | 用于计算深度高度 ##
 1. 非递归方法root先入队；判断root是否有子节点，没有直接出队，有就入左入右
 2. 递归方法？？？
 ```java
@@ -331,7 +381,8 @@ public void BFS(Node root){
 
 ```
 
-### 深度优先遍历DFS-Stack | 用于前中后序遍历 ###
+<a id="%E6%B7%B1%E5%BA%A6%E4%BC%98%E5%85%88%E9%81%8D%E5%8E%86dfs-stack-%7C-%E7%94%A8%E4%BA%8E%E5%89%8D%E4%B8%AD%E5%90%8E%E5%BA%8F%E9%81%8D%E5%8E%86"></a>
+## 深度优先遍历DFS-Stack | 用于前中后序遍历 ##
 1. 递归方法root入栈；判断root是否有子节点，没有直接出栈，有就递归入右入左最后出栈左树再右树
 2. 非递归方法判断左树不为空再判断右树不为空
 ```java
@@ -362,7 +413,8 @@ public void DFS(Node root){
 }
 ```
 
-### 朋友圈 lt547 ###
+<a id="%E6%9C%8B%E5%8F%8B%E5%9C%88-lt547"></a>
+## 朋友圈 lt547 ##
 ```java
 // 递归方法
 public static void main(String[] args){
@@ -397,7 +449,9 @@ public static void main(String[] args){
     }
 ```
 
+<a id="%E5%88%86%E7%B3%96%E6%9E%9C"></a>
 ## 分糖果 ##
+<a id="rating%E9%AB%98%E7%9A%84%E5%A4%9A%E4%BA%8Erating%E4%BD%8E%E7%9A%84"></a>
 ### Rating高的多于Rating低的 ###
 初始化最终数组res[len]为1；一次循环判断rate[i+1]是否大于rate[i]，成立则res[i]+=1，否则res[i]保持初始值为1；二次循环判断rate[i-1]是否大于rate[i]，成立则res[i-1]=Math.max(res[i-1],res[i])
 ```java
