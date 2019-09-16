@@ -15,7 +15,8 @@
     - [二维数组最短路径](#%E4%BA%8C%E7%BB%B4%E6%95%B0%E7%BB%84%E6%9C%80%E7%9F%AD%E8%B7%AF%E5%BE%84)
     - [类二叉树的最短路径](#%E7%B1%BB%E4%BA%8C%E5%8F%89%E6%A0%91%E7%9A%84%E6%9C%80%E7%9F%AD%E8%B7%AF%E5%BE%84)
     - [抢银行](#%E6%8A%A2%E9%93%B6%E8%A1%8C)
-    - [最长公共子序列LCS\(仅有长度，可优化到一维数组\)](#%E6%9C%80%E9%95%BF%E5%85%AC%E5%85%B1%E5%AD%90%E5%BA%8F%E5%88%97lcs%E4%BB%85%E6%9C%89%E9%95%BF%E5%BA%A6%EF%BC%8C%E5%8F%AF%E4%BC%98%E5%8C%96%E5%88%B0%E4%B8%80%E7%BB%B4%E6%95%B0%E7%BB%84)
+    - [最长公共子串 Longest Common Substring](#%E6%9C%80%E9%95%BF%E5%85%AC%E5%85%B1%E5%AD%90%E4%B8%B2-longest-common-substring)
+    - [最长公共子序列 Longest Common Sequence](#%E6%9C%80%E9%95%BF%E5%85%AC%E5%85%B1%E5%AD%90%E5%BA%8F%E5%88%97-longest-common-sequence)
     - [两端取数](#%E4%B8%A4%E7%AB%AF%E5%8F%96%E6%95%B0)
 - [二叉树](#%E4%BA%8C%E5%8F%89%E6%A0%91)
     - [广度优先遍历BFS-Queue | 用于计算深度高度](#%E5%B9%BF%E5%BA%A6%E4%BC%98%E5%85%88%E9%81%8D%E5%8E%86bfs-queue-%7C-%E7%94%A8%E4%BA%8E%E8%AE%A1%E7%AE%97%E6%B7%B1%E5%BA%A6%E9%AB%98%E5%BA%A6)
@@ -239,8 +240,9 @@ public class MainSolution {
 
 ```
 
-<a id="%E6%9C%80%E9%95%BF%E5%85%AC%E5%85%B1%E5%AD%90%E5%BA%8F%E5%88%97lcs%E4%BB%85%E6%9C%89%E9%95%BF%E5%BA%A6%EF%BC%8C%E5%8F%AF%E4%BC%98%E5%8C%96%E5%88%B0%E4%B8%80%E7%BB%B4%E6%95%B0%E7%BB%84"></a>
-## 最长公共子序列LCS(仅有长度，可优化到一维数组) ##
+<a id="%E6%9C%80%E9%95%BF%E5%85%AC%E5%85%B1%E5%AD%90%E4%B8%B2-longest-common-substring"></a>
+## 最长公共子串 Longest Common Substring ##
+仅有长度，可优化到一维数组，可递归打印
 ```java
 public static void main(String[] args){
         Scanner sc = new Scanner(System.in);
@@ -290,6 +292,69 @@ public static void main(String[] args){
             System.out.println(" ");
         }
     }
+```
+
+<a id="%E6%9C%80%E9%95%BF%E5%85%AC%E5%85%B1%E5%AD%90%E5%BA%8F%E5%88%97-longest-common-sequence"></a>
+## 最长公共子序列 Longest Common Sequence
+递归打印，长度和子序列均有
+```java
+import java.util.Scanner;
+public class MainSolution {
+
+    public static void main(String[] args){
+        Scanner sc = new Scanner(System.in);
+        String firstWord =  sc.nextLine();
+        String secondWord =  sc.nextLine();
+        getLCS(firstWord,secondWord);
+    }
+
+    public static void getLCS(String firstWord, String secondWord){
+
+        char[] fList = firstWord.toCharArray();
+        char[] sList = secondWord.toCharArray();
+        int fSize = fList.length;
+        int sSize = sList.length;
+        int[][] res = new int[fSize+1][sSize+1];
+        //初始化
+        for (int i=0;i<=fSize;i++)
+            res[i][0] = 0;
+        for (int i=0;i<=sSize;i++)
+            res[0][i] = 0;
+        //状态转移。字符相等就对角线方向+1，否则取上一行或者左一行的最大值
+        for (int i=1;i<=fSize;i++){
+            for (int j=1;j<=sSize;j++){
+                if (fList[i-1]==sList[j-1])
+                    res[i][j] = res[i-1][j-1]+1;
+                else
+                    res[i][j] = (res[i-1][j]>=res[i][j-1])?res[i-1][j]:res[i][j-1];
+            }
+        }
+        printLCS(fList,sList,res,fSize,sSize);
+        System.out.println("\nMetric is : ");
+        for (int i =0 ;i<=fSize;i++) {
+            for (int j = 0; j <=sSize; j++) {
+                System.out.print(res[i][j]+"\t");
+            }System.out.println();
+        }
+    }
+
+    public static void printLCS(char[] fList, char[] sList,int[][] metric, int i, int j){
+        //遍历到i==0或者j==0时有一个字符串已经被遍历完成直接返回
+        if (i==0||j==0)
+            return ;
+        //查看第i个和第j个是否相等，相等递归打印i-1和j-1位置
+        if (fList[i-1] == sList[j-1]){
+            printLCS(fList, sList, metric, i-1, j-1);
+            System.out.print(sList[j-1]);
+            //如果和上一行metric值相等，递归比较firstWord的第i-1位置和secondWord的第j位置是否相等
+        }else if (metric[i-1][j]==metric[i][j])
+            printLCS(fList, sList, metric, i-1, j);
+        // 如果和上一行metric不相等，递归比较firstWord的第i位置和secondWord的第j-1位置是否相等
+        // 这样下来直到找到左上角第位置使得 i-1 == j-1然后打印
+        else
+            printLCS(fList, sList, metric, i, j-1);
+    }
+}
 ```
 
 <a id="%E4%B8%A4%E7%AB%AF%E5%8F%96%E6%95%B0"></a>
