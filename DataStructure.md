@@ -5,6 +5,7 @@
     - [快速排序](#%E5%BF%AB%E9%80%9F%E6%8E%92%E5%BA%8F)
     - [直接插入排序](#%E7%9B%B4%E6%8E%A5%E6%8F%92%E5%85%A5%E6%8E%92%E5%BA%8F)
     - [选择插入排序](#%E9%80%89%E6%8B%A9%E6%8F%92%E5%85%A5%E6%8E%92%E5%BA%8F)
+    - [堆排序](#%E5%A0%86%E6%8E%92%E5%BA%8F)
     - [比较次数和初始序列](#%E6%AF%94%E8%BE%83%E6%AC%A1%E6%95%B0%E5%92%8C%E5%88%9D%E5%A7%8B%E5%BA%8F%E5%88%97)
     - [确定最终位置](#%E7%A1%AE%E5%AE%9A%E6%9C%80%E7%BB%88%E4%BD%8D%E7%BD%AE)
     - [链表](#%E9%93%BE%E8%A1%A8)
@@ -68,6 +69,13 @@ quickSort(list[],low,high):
 ## 选择插入排序 ##
 第一轮挑选N个数中最小的数放第一，第二轮从剩余N-1个数中找到最小的放到第二位，以此类推每次把剩余数中最小的放到前面有序队列的最后
 
+<a id="%E5%A0%86%E6%8E%92%E5%BA%8F"></a>
+## 堆排序 ##
+1. 数组存储，先建完全二叉树
+2. **初始化**过程：从n/2向下取整位置(即第一个非叶子结点的根节点处)开始调整堆，调整直到第一个根节点，此时完成堆的初始化
+3. 大顶堆小顶堆初始化完成之后，根节点出堆，最后一个叶子结点放到根的位置，继续递归调整
+4. 直到完全二叉树中的所有节点都输出，排序完成，**大顶堆升序排列，小顶堆降序排列**
+
 <a id="%E6%AF%94%E8%BE%83%E6%AC%A1%E6%95%B0%E5%92%8C%E5%88%9D%E5%A7%8B%E5%BA%8F%E5%88%97"></a>
 ##比较次数和初始序列##
 1. 插排 时间复杂度与比较次数，移动次数都与初始序列有关
@@ -118,7 +126,7 @@ while(oldList.hasNext()):
         //切断原连接，将head的下一个节点由next指向pre
         head.next = pre;
         //pre, head, next依次往后移一位
-        pre = head; head = next; next = head.next; 
+        pre = head; head = next;
 ```
 
 <a id="%E5%88%A4%E6%96%AD%E7%8E%AF"></a>
@@ -293,6 +301,81 @@ public static void main(String[] args){
         }
     }
 ```
+
+**优化办法**:由一位数组`tmp`保存每一行的最大值状态，并用两个一位数组记录出现最大长度的位置`maxIndex`和值`maxSeq`。最后根据`maxSeq`和`maxIndex`的首位不为0的最大长度值和最大长度的位置打印出原字符串的子串
+```java
+import java.util.Scanner;
+
+public class MainSolution {
+
+    public static void main(String[] args){
+        Scanner sc = new Scanner(System.in);
+        String firstWord = sc.nextLine();
+        String secondWord = sc.nextLine();
+        getLCS(firstWord, secondWord);
+    }
+
+    //获取LCS
+    public static void getLCS(String firstWord, String secondWord){
+        char[] fList = firstWord.toCharArray();
+        char[] sList = secondWord.toCharArray();
+        int fSize = fList.length;
+        int sSize = sList.length;
+        // 记录最长的字符串长度
+        int maxSize = Math.max(fSize,sSize);
+        //maxSeq代表每一行的最大值，只标记首位为最大，有相同时往后追加，小于忽略大于将首位置为max首位之后的置为0
+        int[] maxSeq = new int[maxSize];
+        //maxIndex在字符相等时标记maxIndex[0]为maxSeq最大值的位置，只有一个最大值就标记maxIndex[0]，maxSeq有几个最大值，maxIndex就有几个标记位置
+        int[] maxIndex = new int[maxSize];
+        //tmp数组标记每一行的动态变化，从上往下从右往左，当字符相等时为前一行时候的对角线值+1，不等时记为0
+        int[] tmp = new int[maxSize];
+        //相同时对角线+1，否则置为0
+        for (int i=0;i<fSize;i++){
+            for (int j=sSize-1;j>=0;j--){
+                //当字符相等的时候进入判断前一个字符是否相等，相等长度累加1或者置为1，不等置为0
+                if (fList[i]==sList[j]) {
+                    if (i==0||j==0)    //首行首列是tmp[j]记为1
+                        tmp[j] = 1;
+                    else               //其余为前一行的最长值累加1获得
+                        tmp[j] = tmp[j-1]+1;
+                }else
+                    tmp[j] = 0;
+
+                //存储最大值和最大值的位置两个数组变动
+                //如果maxSeq的第一位没有当前行的最大值大，即出现了更长的数组，更新maxSeq和maxIndex两个数组的首位值并充值之后的值为0
+                if (tmp[j]>maxSeq[0]){
+                    maxSeq[0] = tmp[j];
+                    maxIndex[0] = j;
+                    for (int q=1;q<maxSize;q++){
+                        maxSeq[q] = 0;
+                        maxIndex[q] = 0;
+                    }
+                    //如果maxSeq的首位即最大值和当前行的最大值相等，即出现了相等长度的字符串，此时在两个数组后面追加相等的值和出现这个值的位置
+                }else if (tmp[j]==maxSeq[0]){
+                    for (int q =0;q<maxSize;q++){
+                        if (maxSeq[q]==0){
+                            maxSeq[q] = tmp[j];
+                            maxIndex[q] = j;
+                            break;
+                        }
+                    }
+                }
+            }
+        }// 若有相同字符串就打印出来多个字符串
+        for (int x=0;x<maxSize;x++){
+            if (maxSeq[x]>0){
+                System.out.println("The "+x+1+" String is :");
+                for (int y=maxIndex[x]-maxSeq[x]+1;y<=maxIndex[x];y++)
+                    System.out.print(sList[y]);
+                System.out.println("");
+            }
+        }
+    }
+
+}
+
+```
+
 
 <a id="%E6%9C%80%E9%95%BF%E5%85%AC%E5%85%B1%E5%AD%90%E5%BA%8F%E5%88%97-longest-common-sequence"></a>
 ## 最长公共子序列 Longest Common Sequence
@@ -470,6 +553,7 @@ public void DFS(Node root){
     stack.push(root);
     while(stack.size()!=0){
         Node node = stack.pop();
+        //栈先压右节点再压左节点，打印的时候即可满足先出左节点再出右节点
         if (node.right != null)
             stack.push(node.right);
         if (node.left !=null)
