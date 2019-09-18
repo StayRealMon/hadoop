@@ -12,7 +12,7 @@
 
 [数仓建模](https://github.com/StayRealMon/hadoop/blob/master/dataWarehouse.md)
 
-[数据库基础](https://github.com/StayRealMon/hadoop/commit/a951e9ff12a7749788e8c27f9592d7782bc3e928)
+[数据库基础](https://github.com/StayRealMon/hadoop/blob/master/sql.md)
 
 [SQL技巧](https://github.com/StayRealMon/hadoop/blob/master/sql_50.md)
 

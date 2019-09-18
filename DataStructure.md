@@ -18,6 +18,7 @@
     - [抢银行](#%E6%8A%A2%E9%93%B6%E8%A1%8C)
     - [最长公共子串 Longest Common Substring](#%E6%9C%80%E9%95%BF%E5%85%AC%E5%85%B1%E5%AD%90%E4%B8%B2-longest-common-substring)
     - [最长公共子序列 Longest Common Sequence](#%E6%9C%80%E9%95%BF%E5%85%AC%E5%85%B1%E5%AD%90%E5%BA%8F%E5%88%97-longest-common-sequence)
+    - [0/1背包](#01%E8%83%8C%E5%8C%85)
     - [两端取数](#%E4%B8%A4%E7%AB%AF%E5%8F%96%E6%95%B0)
 - [二叉树](#%E4%BA%8C%E5%8F%89%E6%A0%91)
     - [广度优先遍历BFS-Queue | 用于计算深度高度](#%E5%B9%BF%E5%BA%A6%E4%BC%98%E5%85%88%E9%81%8D%E5%8E%86bfs-queue-%7C-%E7%94%A8%E4%BA%8E%E8%AE%A1%E7%AE%97%E6%B7%B1%E5%BA%A6%E9%AB%98%E5%BA%A6)
@@ -436,6 +437,60 @@ public class MainSolution {
         // 这样下来直到找到左上角第位置使得 i-1 == j-1然后打印
         else
             printLCS(fList, sList, metric, i, j-1);
+    }
+}
+```
+
+<a id="01%E8%83%8C%E5%8C%85"></a>
+## 0/1背包 ##
+每个物品只能拿一次，背包不一定放满，物品不可拆分
+```java
+import java.util.*;
+
+public class MainSolution {
+
+    public static void main(String[] args){
+        Scanner sc = new Scanner(System.in);
+        int bagSize = Integer.parseInt(sc.nextLine());
+        String weightStr = sc.nextLine();
+        String valueStr = sc.nextLine();
+        int len = weightStr.split(" ").length;
+        int[] weightList = new int[len];
+        int[] valueList = new int[len];
+        for (int i=0;i<len;i++){
+            weightList[i] = Integer.parseInt(weightStr.split(" ")[i]);
+            valueList[i] = Integer.parseInt(valueStr.split(" ")[i]);
+        }printMaxValue(bagSize,len, weightList,valueList);
+    }
+
+    public static  void  printMaxValue(int bagSize, int count, int[] weightList, int[] valueList){
+        if (count==1){
+            if (bagSize>=weightList[0])
+                System.out.println("Max Value is :"+valueList[0]);
+            else
+                System.out.println("Can NOT put any value!");
+        }else if (count==0)
+            System.out.println("Nothing Can put in.");
+        else {
+            int[][] res = new int[count+1][bagSize+1];
+            for (int i=1;i<=count;i++){
+                for (int j=1;j<=bagSize;j++){
+                    // 放得下当前物品就比较不放时的值和放入之后的最大值比较
+                    if (weightList[i-1]<=j) {
+                        res[i][j] = Math.max(res[i - 1][j], res[i - 1][j - weightList[i - 1]] + valueList[i - 1]);
+                    }// 放不下就和没有放的时候value保持一致
+                    else
+                        res[i][j] = res[i-1][j];
+                }
+            }
+            System.out.println("MaxValue is "+res[count][bagSize]+"\nMetric is :\n");
+            for (int i=0;i<=count;i++) {
+                for (int j = 0; j <= bagSize; j++)
+                    System.out.print(res[i][j] + "\t");
+                System.out.println("");
+            }
+        }
+        return;
     }
 }
 ```
