@@ -20,6 +20,7 @@
     - [最长公共子序列 Longest Common Sequence](#%E6%9C%80%E9%95%BF%E5%85%AC%E5%85%B1%E5%AD%90%E5%BA%8F%E5%88%97-longest-common-sequence)
     - [0/1背包](#01%E8%83%8C%E5%8C%85)
     - [两端取数](#%E4%B8%A4%E7%AB%AF%E5%8F%96%E6%95%B0)
+    - [最大连续子序列和](#%E6%9C%80%E5%A4%A7%E8%BF%9E%E7%BB%AD%E5%AD%90%E5%BA%8F%E5%88%97%E5%92%8C)
 - [二叉树](#%E4%BA%8C%E5%8F%89%E6%A0%91)
     - [广度优先遍历BFS-Queue | 用于计算深度高度](#%E5%B9%BF%E5%BA%A6%E4%BC%98%E5%85%88%E9%81%8D%E5%8E%86bfs-queue-%7C-%E7%94%A8%E4%BA%8E%E8%AE%A1%E7%AE%97%E6%B7%B1%E5%BA%A6%E9%AB%98%E5%BA%A6)
     - [深度优先遍历DFS-Stack | 用于前中后序遍历](#%E6%B7%B1%E5%BA%A6%E4%BC%98%E5%85%88%E9%81%8D%E5%8E%86dfs-stack-%7C-%E7%94%A8%E4%BA%8E%E5%89%8D%E4%B8%AD%E5%90%8E%E5%BA%8F%E9%81%8D%E5%8E%86)
@@ -537,6 +538,23 @@ public class MainSolution {
 }
 
 ```
+
+<a id="%E6%9C%80%E5%A4%A7%E8%BF%9E%E7%BB%AD%E5%AD%90%E5%BA%8F%E5%88%97%E5%92%8C"></a>
+## 最大连续子序列和 ##
+不一定是负数就不可取，可能取了负数之后的正数更大，是简单的动态规划，取之前最大值加当前值和当前值比较
+```java
+public static void getMaxSum(int[] inputList, int len){
+        int preSum = 0,maxSum = 0;
+        for (int i=0;i<len;i++){
+            //若之前的序列和小于0，则取当前值作为序列和(当前值也有可能小于0，不必在意)
+            //之前的序列和不小于0，取之前序列和加上当前值作为最新的序列和(可能会加上负数导致结果小于之前的序列和)
+            preSum = preSum<=0?inputList[i]:(preSum+inputList[i]);
+            maxSum = maxSum>preSum?maxSum:preSum;
+        }
+        System.out.println(preSum+"\t"+maxSum);
+    }
+```
+
 
 <a id="%E4%BA%8C%E5%8F%89%E6%A0%91"></a>
 # 二叉树 #
