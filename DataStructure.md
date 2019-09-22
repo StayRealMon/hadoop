@@ -21,6 +21,7 @@
     - [0/1背包](#01%E8%83%8C%E5%8C%85)
     - [两端取数](#%E4%B8%A4%E7%AB%AF%E5%8F%96%E6%95%B0)
     - [最大连续子序列和](#%E6%9C%80%E5%A4%A7%E8%BF%9E%E7%BB%AD%E5%AD%90%E5%BA%8F%E5%88%97%E5%92%8C)
+    - [无限硬币找零组合数](#%E6%97%A0%E9%99%90%E7%A1%AC%E5%B8%81%E6%89%BE%E9%9B%B6%E7%BB%84%E5%90%88%E6%95%B0)
 - [二叉树](#%E4%BA%8C%E5%8F%89%E6%A0%91)
     - [广度优先遍历BFS-Queue | 用于计算深度高度](#%E5%B9%BF%E5%BA%A6%E4%BC%98%E5%85%88%E9%81%8D%E5%8E%86bfs-queue-%7C-%E7%94%A8%E4%BA%8E%E8%AE%A1%E7%AE%97%E6%B7%B1%E5%BA%A6%E9%AB%98%E5%BA%A6)
     - [深度优先遍历DFS-Stack | 用于前中后序遍历](#%E6%B7%B1%E5%BA%A6%E4%BC%98%E5%85%88%E9%81%8D%E5%8E%86dfs-stack-%7C-%E7%94%A8%E4%BA%8E%E5%89%8D%E4%B8%AD%E5%90%8E%E5%BA%8F%E9%81%8D%E5%8E%86)
@@ -549,10 +550,36 @@ public static void getMaxSum(int[] inputList, int len){
             //若之前的序列和小于0，则取当前值作为序列和(当前值也有可能小于0，不必在意)
             //之前的序列和不小于0，取之前序列和加上当前值作为最新的序列和(可能会加上负数导致结果小于之前的序列和)
             preSum = preSum<=0?inputList[i]:(preSum+inputList[i]);
+            //maxSum代表着之前序列的和与加上当前值之后的序列和两者的较大值，即全局最大值
             maxSum = maxSum>preSum?maxSum:preSum;
         }
         System.out.println(preSum+"\t"+maxSum);
     }
+```
+
+<a id="%E6%97%A0%E9%99%90%E7%A1%AC%E5%B8%81%E6%89%BE%E9%9B%B6%E7%BB%84%E5%90%88%E6%95%B0"></a>
+## 无限硬币找零组合数 ##
+动态规划，每种硬币最多可以用 `sum/coin[i]` 个，可以用0个1个2个一直到`sum/coin[i]`个，用二维填表方法，行代表第i个硬币`coin[i]`，列代表`0-sum`，则dp[i][j]即代表着用前i个硬币组成j的方法数，动态转移方程是`dp[i][j]+=dp[i-1][sum-k*coin[i]]`，其中`0<k<sum/coin[i]`，即用k个硬币，代入到转移方程
+```java
+public static void getCoinCombin(int[] coins, int sum){
+    //考虑到硬币种类为0和sum值为0两种情况，因此二维表要多一行一列边界值
+    int[][] dp = new int[coins.length+1][sum+1];
+    // 其中第一列代表要用硬币凑出值为0的情况数，这种组合结果就是不拿，因此结果为1
+    // 第一行代表用不存在的硬币凑出值sum，这种组合结果不存在，因此结果为0
+    for (int i=0;i<=coins.length ;i++ ) 
+        dp[i][0] = 1;
+    // 每次遍历一行，将前一行的组合数累加进来
+    for (int i=0;i<=coins.length ;i++ ) {
+        // 对于每一列，第一列初始值为1
+        for (int j=1;j<=sum ;j++ ) {
+            // 使用同一个硬币的时候组合数都是一样的，关键在于累加
+            for (int k=0;k<sum/coins[i] ;k++ ) {
+                dp[i][j] += dp[i-1][sum-k*coins[i]]
+            }
+        }
+    }System.out.println(dp[coins.length][sum]);
+}
+
 ```
 
 
