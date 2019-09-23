@@ -6,15 +6,35 @@
 
 改造hive表后怎么进行数据一致性校验的，有没有自动化流程
 
+|@| 数据倾斜原因
+>1. 表中的key过于集中，分布在几个reducer运行很慢(若是map端运行缓慢一般是数据源本身就分布不均匀；reduce端的运行缓慢是因为partition的问题)
+>2. 大表之间的bucket分桶，值为0或者null的字段会被统一用一个reducer处理，运行慢
+>3. group by的维度过小集中值过多
+>4. count distinct的时候有特殊值出现太多
+
+```sql
+-- 倾斜key超过阈值的时候，根据建表的时候skewjoin.key字段进行skewjoin
+-- 在运行时动态指定数据进行skewjoin，一般和hive.skewjoin.key参数一起使用
+set hive.optimize.skewjoin = true;
+-- 记录条数超过100000时采用skewjoin操作，两层mr，第一层把相同的key相当于shuffle
+set hive.skewjoin.key = skew_key_threshold （default = 100000）
+-- map端提前combiner
+set hive.map.aggr=true (默认true)这个配置项代表是否在map端进行聚合，相当于Combiner。
+set hive.groupby.skewindata=true (默认false)
+-- 合并小文件
+set hive.input.format=org.apache.hadoop.hive.ql.io.CombineHiveInputFormat;
+```
+
 |@| 大表Join小表优化，怎么解决hive数据倾斜问题
 > 1. 分为common join 和 map join(结合buckets,即更细粒度的partition)；
 > 2. common join就是普通的mr任务，输出文件为reduce个数；common join的map任务中有两个表的数据(均不完整)，map的输出key为两个表join on的联合字段，value会包含表tag的信息，再shuffle被reduce拉走排序，reduce中有相同的联合key，和不同tag的value，再做join效率较低
 > 3. map join没有reduce阶段，小表在左先读到hashtable中，left join大表(防止大表读到内存中直接OOM)，map大表读数据遍历hashtable做连接，输出文件个数为map的个数
 > 4. mapjoin实际上是把小表数据添加到所有的map任务中而对性能不会产生较大影响
 
+```sql
 	set hive.auto.convert.join=true;
-	hive.mapjoin.smalltable.filesize=25000000
-
+	hive.mapjoin.smalltable.filesize=25000000(默认值25M)
+```
 > 5. 若where条件中有不等连接，会产生笛卡儿积导致数据量倍增，而在map中提前把符合条件的key筛选出来再shuffle到reduce，提升效率
 
 |@| [大表×大表](https://developer.aliyun.com/article/716531?spm=a2c6h.12873581.0.0.169a187a1bv2Oa&groupCode=bigdata "大表 × 大表")
@@ -38,8 +58,9 @@ select * from new_left join new_right on new_left.id=new_right.id
 > 3. 使用map join提前在map端就做好join；使用combinner合并即local reduce
 > 4. 自定义partition函数指定分区策略
 > 
-> 5. hive.groupby.skewindata=true：数据倾斜时负载均衡，当选项设定为true，生成的查询计划会有两个MRJob。第一个MRJob 中，Map的输出结果集合会随机分布到Reduce中，每个Reduce做部分聚合操作，并输出结果，这样处理的结果是相同的GroupBy Key 有可能被分发到不同的Reduce中，从而达到负载均衡的目的；第二个MRJob再根据预处理的数据结果按照GroupBy Key分布到Reduce中（这个过程可以保证相同的GroupBy Key被分布到同一个Reduce中），最后完成最终的聚合操作。
+> 5. `hive.groupby.skewindata=true` ：数据倾斜时负载均衡，当选项设定为true，生成的查询计划会有两个MRJob。第一个MRJob 中，Map的输出结果集合会随机分布到Reduce中，每个Reduce做部分聚合操作，并输出结果，这样处理的结果是相同的GroupBy Key 有可能被分发到不同的Reduce中，从而达到负载均衡的目的；第二个MRJob再根据预处理的数据结果按照GroupBy Key分布到Reduce中（这个过程可以保证相同的GroupBy Key被分布到同一个Reduce中），最后完成最终的聚合操作。
 
+|@| [Hive优化](https://blog.csdn.net/MrLevo520/article/details/76339075)
 
 parquet(二进制方式存储的，所以是不可以直接读取的，文件中包括该文件的数据和元数据) orc textfile
 
@@ -54,6 +75,21 @@ parquet(二进制方式存储的，所以是不可以直接读取的，文件中
 > 6. **RANGE**是在单个列上做范围限定，因此order by后只能跟一个col，若order by后有多个字段只能使用 **ROW**
 > 7. **Range**看作是值偏移，是物理偏移，在某一列排序后的实际值上影响结果，实际行数可能会因为值的变动而变动；**ROW**看作是行偏移，是逻辑偏移，在排序后所在对应的行号上进行逻辑偏移，实际行数是固定的(除非前后无数据影响行数，偏移是作用于行数据的)
 ![](https://img-blog.csdn.net/20150211163916135?watermark/2/text/aHR0cDovL2Jsb2cuY3Nkbi5uZXQveGllcGVpZmVuZw==/font/5a6L5L2T/fontsize/400/fill/I0JBQkFCMA==/dissolve/70/gravity/Center)
+> 8. 连续登陆的用户？`logindate - row_number() over (partition by userid order by logindate) as groupday`，即日期减去row number相同的时候，为连续登录并且得到的就是第一天登陆日期。 [参考链接](https://blog.csdn.net/qq_35178482/article/details/88567842)
+
+```sql
+Select UID,max(cnt) as cnt
+From (
+            Select UID,Grp_No,count(*) as cnt
+            From (
+                    Select UID,LoadTime,(Day(LoadTime)-ROW_NUMBER() OVER (Partition By UID Order By UID,LoadTime)) as Grp_No 
+                    From Tmp_Data 
+                  ) a
+            Group By UID,Grp_No
+      ) a
+Group By UID
+```
+
 
 ### 安装模式 ###
 内嵌模式(Derby/一个活动用户)&本地模式(MetaStore位于Hive进程中)&完全远程模式(MetaStore位于数据库中，支持多用户连接)
