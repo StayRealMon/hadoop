@@ -1,11 +1,21 @@
 ## 面试 ##
 |@| zookeeper做分布式锁
+1. 利用zk中ZNode的树状结构性质，ZNode共有四种类型(持久PERSISTENT/持久顺序PERSISTENT_SEQUENTIAL/临时EPHEMERAL/临时顺序EPHEMERAL_SEQUENTIAL)
+2. 持久节点断开连接后依然存在，临时节点会被删除；顺序节点会根据时间编号；分布式锁利用了最后一种临时顺序节点
+3. 持久节点ParentLock，client想要获得锁就先在这个节点写创建临时顺序节点，若ParentLock下的临时顺序节点序号最小则获得锁，否则进入等待状态，同时监听watch最last一个临时顺序节点
+4. 释放锁可以由client主动断开连接发起，此时主动删除临时顺序节点释放锁；也可以由于节点崩溃被动断开连接导致
+5. 优点有封装好的框架，容易实现，有等待锁的队列，大大提升抢锁效率；缺点添加和删除节点性能较低
+
 |@| flink了解哪些，它的基本架构原理
 > flink on yarn 的任务提交和任务调度 & 两种window(count||time)三种窗口方式(tumble/slide/session)以及三个time(event/ingestion/process) & watermark
 
-|@| flink中其中一个节点宕机之后，怎样恢复的
-|@| flink的checkpoint机制与恢复
+|@| flink 1.9 新特性
+1. DDL初步支持；Table API的增强支持Map/FlatMap
+2. 批处理failover优化：下游任务失败不需要回溯到整张图，中间有cache层，只需重启很小一部分子图而不是整个作业(有点像rdd的持久化)
+
 |@| flink是怎样保证exact-once的保证；为甚是要插入barrier来做checkpoint，而不是在不同算子的定时器来做checkpoint
+1. Flink 会在数据源中定期插入Barrier，框架在看到 Barrier 后会对本地的 State 做一个快照，然后再将 Barrier 往下游发送。我们可以近似的认为处理 Checkpoint 的Barrier只会引出一个消息处理的 `overhead`，这和正常的消息处理量相比几乎可以忽略不计
+2. 依赖于算子本身的定时器没有考虑到消息的延迟，不能保证高一致性，任务失败重跑就得出了错误的结果
 
 |@| 很大的m*n的数组中，每一行有序，每一列无序，如何求其topk
 |@| 短url映射长url，系统qps5000，要求设计一套完整的高可用分布式系统，设计数据库结构，负载均衡等，且要求可以1s内查询到出现次数前100的Url
@@ -40,9 +50,6 @@
 > 5. 实时维度层：通过HBase存储数据，同时需要实时消息维度变化的消息，及时更新至HBase的维度表，保证业务实时获取维度信息
 > 6. 实时维度补全&中间结果dump处理，将存储至kafka的数据以flume+kafka的近线方式dump到Hive离线数仓，方便定位每个环节的数据，保证实时结果可验证和出问题时结果可修复
 
-## scala ##
-
-
 ## spark ##
 tachyon:in-memory file system
 
@@ -58,7 +65,7 @@ map结束到reduce开始之间称为shuffle
 spark会将某些步骤基于内存处理，避免磁盘I/O迭代
 
 
-### SparkConf &SparkContext###
+### SparkConf &SparkContext ###
 SparkConf:设置spark的运行模式(Local/Standalone/yarn/mesos)；app的名称和资源(memory&core)设置
 SparkContext:通往集群的唯一通道，通过sc获取第一个rdd
 
