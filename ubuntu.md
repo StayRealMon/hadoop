@@ -63,3 +63,15 @@ mysql -u root -p (root)
 		gzip -d all.gz/gunzip all.gz
 		bzip -d all.bz2/bunzip all.bz2
 		uncompress all.Z
+
+## iTerm + zsh ##
+
+1. 查看所有shell `cat /etc/shell`
+2. 查看当前使用的shell `echo $SHELL`，查看zsh版本`zsh --version`
+3. 下载`iTerm2`/`oh my zsh`/包管理`homebrew`
+4. omz下载安装`curl -L https://github.com/robbyrussell/oh-my-zsh/raw/master/tools/install.sh | sh` 或者 `sh -c "$(curl -fsSL https://github.com/robbyrussell/oh-my-zsh/raw/master/tools/install.sh)"`
+5. bash与zsh互相切换`chsh -s /bin/zsh(bash)`
+6. 变更iTerm2的主题，`ZSH_THEME="agnoster"`
+7. 乱码情况需要下载`powerline`字体包，`git clone https://github.com/powerline/fonts.git --depth=1`
+8. 主题和插件的修改在路径`~/.oh-my-zsh/custom/`下
+
