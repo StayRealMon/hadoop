@@ -21,16 +21,28 @@ mysql -u root -p (root)
 (n)yy -> p
 15. scp xxx-xxx.xml ts@192.168.0.1:/home/ts
 16. hosts文件生效
-16.1 sudo /etc/init.d/networking restart
-16.2 sudo /etc/init.d/dns-clean start
+    1. sudo /etc/init.d/networking restart
+    2. sudo /etc/init.d/dns-clean start
 17. wc -lwc user_data
 18. cat ad_operation.dat |head -n 30 | tail -n -20 前20行的后10行，即10-30
 19. cat ad_operation.dat |tail -n +10 | head -n 20 10行开始显示20行，即10-30
 20. sed -n '10,30p' user_data 直接查看10-30行
+21. 新建文件用`touch`;覆盖文字到文件`echo 'comments' > file1.txt`;追加内容到文件`echo 'second line' >> file1.txt`
 
 
 ## 文件权限 ##
-按1/3/3/3分，即-/rwx/r--/r--，分别为**文件类型**、**文件属主**、**文件属组**和**其他用户**的对应权限。
+
+```bash
+‐rwxrw‐r‐‐233 root staff 1412 9 30 11:17 directory
+```
+
+1. 修改权限 `chmod u=rwx,g=rx,o=x directory/`
+2. `r=4,w=2,x=1`，以上命令可以改写成`chmod 731 directory/`
+3. 再改回原权限可以使用`chmod g-x,g+w directory/`
+4. `root`代表当前用户，`staff`代表当前用户所在组；可以用`whoami`查看当前用户；`groups`查看组的信息；`groups $USER_NAME`查看当前用户所在组信息；`id -a $USER_NAME`查看更加详细的组信息
+5. `233`代表文件数目；`1412`表示文件大小(字节)；`9 30 11:17`代表最后修改时间
+
+按1/3/3/3分，即-/rwx/r--/r--，分别为 **文件类型**、**文件属主**、**文件属组**和 **其他用户**的对应权限。
  第一段为文件类型：-为常规文件，d为目录，l为符号链接等。 其中rwx分别为read可读、write可写和可执行executable
 
 
@@ -49,7 +61,7 @@ mysql -u root -p (root)
 
 
 ## 压缩包 ##
-
+```bash
 		tar -cf all.tar *.gif		//c产生新的包；f指定文件名
 		tar -rf all.tar *.jpg		//r增加文件到all.tar
 		tar -tf all.tar			//t列出tar包下所有文件
@@ -63,7 +75,7 @@ mysql -u root -p (root)
 		gzip -d all.gz/gunzip all.gz
 		bzip -d all.bz2/bunzip all.bz2
 		uncompress all.Z
-
+```
 ## iTerm + zsh ##
 
 1. 查看所有shell `cat /etc/shell`
