@@ -281,9 +281,11 @@ AM以作业为单位，负载到不同的节点进行作业调度，避免单点
 	        private final static IntWritable one = new IntWritable(1);
 	        //word是实际的单词，不是偏移量，是map后<K, V>中的Key
 	        private Text word = new Text();
-	
+            //Mapper中实现的map方法参数有obj text 和 context。其中context没有实现，Context类是Mapper中的一个抽象类，本身也没有实现，只有一个默认构造函数
 	        public void map (Object key, Text value, Context context) throws IOException, InterruptedException {
 	            //StringTokenizer用来做切割；Object key表面上是Word实际上是Word在整个文件中的偏移量，是一个Long Int型
+                //在new的时候构造参数默认只有一个String，此时delimiter默认为\t\n\r\f四种即\tab\return(回到本行开头会覆盖原内容)\nextline\下一页的开头
+                //除了delim参数还有一个boolean returnDelim，为true的时候会把第二个参数中的delim也返回，默认为false
 	            StringTokenizer itr = new StringTokenizer(value.toString());
 	            while (itr.hasMoreTokens()){
 	                word.set(itr.nextToken());
