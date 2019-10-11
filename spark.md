@@ -175,7 +175,7 @@ producer&consumer&broker(处理读写请求和存储消息，通过zookeeper协�
 
 ### Message Set 数据压缩###
 > 支持GZIP和Snappy压缩协议；端到端的压缩
-> 客户端的消息可以一起被压缩后送到服务端，并**以压缩后的格式写入**日志文件，**以压缩的格式发送**到consumer，消息从producer发出到consumer拿到都被是压缩的，只有在consumer**使用的时候才被解压缩**，所以叫做“端到端的压缩”。
+> 客户端的消息可以一起被压缩后送到服务端，并 **以压缩后的格式写入**日志文件，**以压缩的格式发送**到consumer，消息从producer发出到consumer拿到都被是压缩的，只有在consumer **使用的时候才被解压缩**，所以叫做“端到端的压缩”。
 
 ## exactly-once 语义 ##
 一个sender发送一条message到receiver。根据receiver出现fail时sender如何处理fail，可以将message delivery分为三种语义:
