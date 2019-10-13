@@ -313,7 +313,7 @@ AS()中的数据是处理后的数据，对应insert新表的fields
 [解决方案2](https://bupt04406.iteye.com/blog/1560796)
 
 直接修改得时候会报错
-```sh
+```bash
 	FAILED: Execution Error, return code 1 from org.apache.hadoop.hive.ql.exec.DDLTask. Unable to alter table. The following columns have types incompatible with the existing columns in their respective positions :
 ```
 可以在CLI中将参数修改，这样可以强制修改字段类型忽略可能产生的问题
@@ -350,7 +350,7 @@ AS()中的数据是处理后的数据，对应insert新表的fields
 ## 0716 ##
 加入工单值班，做数据抽取
 1. **加字段**先在cloud查现有字段，和pg_meta表现有字段，对比哪些是新增的。接着在cloud修改表结构cascade，执行成功后使用ide调度或者wiki查历史任务是全量或者增量，备份原任务代码，新增字段，重跑任务无误后完成√
-2. **新建表**申请pg库对应的表权限，查建表时间、更新时间和数据量，判断全量同步OR增量同步，判断分区？全量同步直接create_day<${day+1}，增量好像需要${day}<create_day<${day+1}？在cloud中建表的时候，注意查询变量show create table ${table_name} 获得外部表保存的集群路径等参数(写好之后葛大爷check一下)；ide中建立抽取任务，写脚本的时候注意json::text，geo要分割成lat和lng；运行无误后cloud查询再上线即可
+2. **新建表**申请pg库对应的表权限，查建表时间、更新时间和数据量，判断全量同步OR增量同步，判断分区？全量同步直接create_day<${day+1}，增量好像需要${day}< create_day<${day+1}？在cloud中建表的时候，注意查询变量show create table ${table_name} 获得外部表保存的集群路径等参数(写好之后葛大爷check一下)；ide中建立抽取任务，写脚本的时候注意json::text，geo要分割成lat和lng；运行无误后cloud查询再上线即可
 
 > 数据同步--先定分区再定同步
 > 
@@ -369,11 +369,11 @@ AS()中的数据是处理后的数据，对应insert新表的fields
 ## 0719 ##
 单独开一条，因为两天导错了两次数据。
 0718竟然是因为字段名复制粘贴错了???(加班到21:20)。
-0719自以为建表语句没问题，建了三张错的表哈哈哈哈，结果两天一共1.2kw条数据目前生死未卜。建表的**地理位置要分成经纬度存**三遍啊记住了记住了记住了。(葛大爷真的牛啤好吧pg库溜到飞起，不要再因为建表语句的问题给葛大爷惹麻烦啦)
+0719自以为建表语句没问题，建了三张错的表哈哈哈哈，结果两天一共1.2kw条数据目前生死未卜。建表的 **地理位置要分成经纬度存**三遍啊记住了记住了记住了。(葛大爷真的牛啤好吧pg库溜到飞起，不要再因为建表语句的问题给葛大爷惹麻烦啦)
 
 ## 0726 ##
 1. 大表(一般是流水日志表量大不更新)抽取：pg库存在主从备份，且有些表的备份频率会比较高，每次备份的时候会锁死行记录(保证备份过程中数据不会改变，备份完之后就像WAL一样再把操作写进来就ok了)，此时sqoop工具不能访问pg库。
-2. 解决办法就是在备份的空隙用sqoop抽取较短的分区数据，一个月一周甚至五天三天，将大表的历史数据抽取到一张临时表里。再对临时表进行读取操作通过hive的**动态分区**写到新的表里，新表根据create_date创建自动分区，解决了大表历史数据同步问题。接下来就是每天增量更新新数据就可以了。
+2. 解决办法就是在备份的空隙用sqoop抽取较短的分区数据，一个月一周甚至五天三天，将大表的历史数据抽取到一张临时表里。再对临时表进行读取操作通过hive的 **动态分区**写到新的表里，新表根据create_date创建自动分区，解决了大表历史数据同步问题。接下来就是每天增量更新新数据就可以了。
 
 
 ## 0815 ##
@@ -388,9 +388,10 @@ AS()中的数据是处理后的数据，对应insert新表的fields
 3. job的split过程主要是根据限流配置计算channel的个数，进而计算task的个数
 4. 每一个Task都由TaskGroup负责启动，Task启动后，会固定启动Reader—>Channel—>Writer的线程来完成任务同步工作
 5. 脏数据超过一定比例就直接报告job失败
+6. channel内部的类型转换是基于6种datax基本类型`Date/Long/Double/Bytes/String/Bool`之间的转换
 
 > 1. datax 的 hdfs write mode 有append和nonConflict，前者不会检查直接写数据，后者会判断是否存在有fileName，有就直接报错
-> 2. Sqoop通过提交只有map的mr任务到集群，每个map只读取数据的一个split，并发执行**吞吐量大**但是过多的map任务启动和销毁需要消耗时间，且过多的连接**对上游数据库造成压力**；datax解耦为reader - Channel - writer框架，**单机多线程**并发运行一次同步为一个job，分成task按照taskgroup一起并发执行，没有sqoop吞吐量大但是速度快，writemode不友好，会有脏数据和数据丢失的情况(可配置阈值)。
+> 2. Sqoop通过提交只有map的mr任务到集群，每个map只读取数据的一个split，并发执行**吞吐量大**但是过多的map任务启动和销毁需要消耗时间，且过多的连接 **对上游数据库造成压力**；datax解耦为reader - Channel - writer框架，**单机多线程**并发运行一次同步为一个job，分成task按照taskgroup一起并发执行，没有sqoop吞吐量大但是速度快，writemode不友好，会有脏数据和数据丢失的情况(可配置阈值)。
 
 ### 0904答辩 ###
 1. datax的framework是怎么工作的？定制化reader和writer，channel在中间作为解耦作用/IO流转换

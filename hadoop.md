@@ -1,13 +1,13 @@
 ## 面试题 ##
 |@| 海量数据找相同
-> 取hash，50e的两个url文件**取hash(url)%1000**即可分为2k个小文件，且相同的url肯定会在相同的小文件中，再把一个小文件放到hash表中，遍历另一对小文件查找hash表即可√
+> 取hash，50e的两个url文件 **取hash(url)%1000**即可分为2k个小文件，且相同的url肯定会在相同的小文件中，再把一个小文件放到hash表中，遍历另一对小文件查找hash表即可√
 
 |@| 海量数据求topk
 > 1. **堆排序(快选堆基不稳定，好坏时间都是nlogn空间1)**：每次只读100个数，然后构造大/小顶堆，不需要一次读完所有数据，遍历一遍即可找到最大的top100
 > 2. 先散列到1k个小文件中，再小文件中求出每个ID的频率，最后对1k个小文件最大前k个ID拿出来再排序，最终结果即是海量top K
 
 |@| 海量数据快速查找；BitMap受最大数的影响，适用于不重复数据
-> 申请一个a[1+N/32]长的bit数组，将N个数散列到1+N/32个数组下标中(0-31,32-63....)一个int整数就是4字节32bit，利用移位将32bit中$N_i$所在的位置置为1，23457可转化为00111101，最后按照顺序把bit位为1的位置输出就ok了
+> 申请一个a\[1+N/32\]长的bit数组，将N个数散列到1+N/32个数组下标中(0-31,32-63....)一个int整数就是4字节32bit，利用移位将32bit中$N_i$所在的位置置为1，23457可转化为00111101，最后按照顺序把bit位为1的位置输出就ok了
 
 |@|海量数据查不存在，1-100w的连续id数据无序存放，有两个id丢失，快速查找
 >1. 先想到的是mr，可以对1-100w求和，然后对文件求和，两个和的差就是丢失记录的和，根据这个和再去找丢失的两个id，还是没有解决问题
@@ -121,19 +121,21 @@ Data Node作用：①对本节点进行管理②提交自己保存的Block列表
 > 故障切换的 **代理方法**和免密钥配置
 
 1.  同一个物理cluster集群，要先启动 **journalNode**(供新的HA集群NN1格式化的edit_log和fsimage存新的集群日志)
-
+```bash
 		hadoop-daemon.sh start journalnode
-
+```
 2.  然后 **format**NN1(日志信息保存到JNN)
-
+```bash
 		hdfs namenode -format
+```
 3.  接着 **standby启动**NN2，但是不需要format，会根据NN1存于JournalNode的日志信息进行同步，此时处于standby状态，NN2会同步已经格式化的所有DN信息(同步完之后不会启动而是立即shutdown，启动需要在NN1执行start-dfs.sh命令，和DN一起启动)
-
+```bash
 		hdfs namenode --help(-bootstrapStandby)
-
+```
 4. 若是首次安装ZK集群，需要先 **启动zookeeper的节点**，进行 **格式化**，建立空的目录树，用于ZKFC进行锁的争抢(若已经进行过格式化则跳过此步骤，直接执行start-dfs.sh命令启动集群即可)
+```bash
 		hdfs zkfc -formatZK
-
+```
 > 先启动JNs，供NN1格式化，存储最新的日志
 > 格式化NN1，新的日志保存到JNs
 > NN2以standby启动，同步日志后shutdown
@@ -214,16 +216,16 @@ Data Node作用：①对本节点进行管理②提交自己保存的Block列表
 **client**：对源文件计算，划分为Split List；上传jar&Split List&配置信息到HDFS，供节点获取，最后触发JobTracker
 > 以作业为单位；规划作业的计算分布；提交作业到HDFS；请求JobTracker启动作业
 
-**JobTracker**：**调度**和**资源管理**；获取TaskTracker的心跳汇报，分析资源并进行调度
+**JobTracker**：**调度**和 **资源管理**；获取TaskTracker的心跳汇报，分析资源并进行调度
 > 核心主节点；调度所有的作业；根据心跳汇报监控集群的资源
 
 **TaskTracker**：心跳汇报信息给JobTracker；获取JobTracker分配的task，从HDFS中获取Jar&Split&配置文件，运行Task
 > 从节点，自身资源管理；和JobTracker心跳汇报状态和资源；获取Task
 
-JobTracker**负载过大**，**单点故障**；资源管理和作业调度位于同一个节点，有**强耦合**，若有其他作业又需要实现一个新的JobTracker；且不同的框架对资源不能进行**全局管理**；(YARN可以)
+JobTracker **负载过大**，**单点故障**；资源管理和作业调度位于同一个节点，有**强耦合**，若有其他作业又需要实现一个新的JobTracker；且不同的框架对资源不能进行 **全局管理**；(YARN可以)
 
 ## Hadoop2.x ##
-JobTracker的**①作业调度**由AppMaster管理；②资源管理由ResourceManager实现
+JobTracker的 **①作业调度**由AppMaster管理； **②资源管理**由ResourceManager实现
 
 > Job1->RM->AM1->Container1
 > 
@@ -232,6 +234,10 @@ JobTracker的**①作业调度**由AppMaster管理；②资源管理由ResourceM
 RM根据集群中NodeManager的心跳汇报获取节点资源状态。
 AM以作业为单位，负载到不同的节点进行作业调度，避免单点故障
 > 每一个Node中必有一个NM做状态资源心跳汇报；可能会有AM和Container；RM为每一个Job分配一个AM，挑选资源足够不忙的Node产生若干个Container，Container由NM监控管理
+
+###yarn启动流程###
+1. 大框架：第一阶段是RM启动AM；第二阶段是由AM申请资源并监控container的工作状况，直到运行完毕销毁自己
+2. client提交job任务到RM，同时上传所需要的资源如jar包和文件到hdfs/RM收到请求之后会先在NM中产生第一个container，用于AM的启动/AM启动完成后向RM反馈注册成功，之后由AM向RM申请NM list用于在NM上启动新的工作container/所有container完成后AM向RM提交注销申请关闭自己。
 
 ![](https://uploadfiles.nowcoder.com/images/20190503/4206388_1556867387537_0B02D0BDA344265364CB97AE71F94407)
 
