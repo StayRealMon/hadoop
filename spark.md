@@ -100,8 +100,8 @@ Transformation算子懒加载，遇到Action的时候才触发，Action会一直
 
 持久化算子包括
 1. rdd.cache()将RDD存储在内存中，懒执行算子；
-2. rdd.persist()手动指定持久化级别disk/Memory/OffHeap(堆外内存Techyon)/Deserialized/replication[内存不够了再放磁盘]；
-3. checkpoint将数据存在磁盘中，切断rdd的lineage，application跑完之后persist持久化的数据被回收，而checkpoint会永久存储于disk供下一个app使用[先由action触发回溯到数据源，计算到被标记的rdd的时候，把rdd结果setCheckpoint到disk，切断lineage])
+2. rdd.persist()手动指定持久化级别disk/Memory/OffHeap(堆外内存Techyon)/Deserialized/replication\[内存不够了再放磁盘\]；
+3. checkpoint将数据存在磁盘中，切断rdd的lineage，application跑完之后persist持久化的数据被回收，而checkpoint会永久存储于disk供下一个app使用\[先由action触发回溯到数据源，计算到被标记的rdd的时候，把rdd结果setCheckpoint到disk，切断lineage\])
 
 持久化算子的最小单位都是partition。
 
@@ -137,7 +137,7 @@ producer&consumer&broker(处理读写请求和存储消息，通过zookeeper协�
 6. group内是queue消费模型，不同的consumer消费不同的partition，没消费完可以被其他consumer继续消费；consumer利用zookeeper维护消费到partition的某个offset；所有consumer都在一个group就等价于queue，每个group只有一个consumer就等价于发布订阅系统
 7. zk协调broker/存储元数据/consumer的offset信息/topic信息和partition信息
 
-> kafka也是依赖于zk，需要有zk环境的支持；配置kafka的config/*.properties；启动zk/kafka(bin/*start.sh config/*.properties)
+> kafka也是依赖于zk，需要有zk环境的支持；配置kafka的config/\*.properties；启动zk/kafka(bin/\*start.sh config/\*.properties)
 > 启动之后可以创建查看删除topic(bin/kafka-topic.sh --create/describe/delete)
 > 在producer/consumer窗口启动消息控制台(bin/kafka-console-*.sh)
 
@@ -153,10 +153,10 @@ producer&consumer&broker(处理读写请求和存储消息，通过zookeeper协�
 
 ### 选举 ###
 集群由一个节点controller负责leader的选举和所有partition的均匀分布，使每个节点都会存在一定比例的leader
-1. 只有**leader 负责读写**，**follower只负责备份(被动)**，如果leader宕机的话,Kafaka动态维护了一个同步状态的副本的集合（a set of in-sync replicas），简称ISR(针对每个Topic维护一个ISR),ISR中有f+1个节点，就可以允许在f个节点down掉的情况下不会丢失消息并正常提供服。ISR的成员是动态的，如果一个节点被淘汰了，当它重新达到“同步中”的状态时，他可以重新加入ISR。因此如果leader宕了，**直接从ISR中选择一个follower**就行；不同的topic下不同的partitioner有不同的leader，避免n×n的复杂链路，保证了一致性；ISR(0,1,all)反馈ack之后leader反馈commit给client
+1. 只有 **leader 负责读写**，**follower只负责备份(被动)**，如果leader宕机的话,Kafaka动态维护了一个同步状态的副本的集合（a set of in-sync replicas），简称ISR(针对每个Topic维护一个ISR),ISR中有f+1个节点，就可以允许在f个节点down掉的情况下不会丢失消息并正常提供服。ISR的成员是动态的，如果一个节点被淘汰了，当它重新达到“同步中”的状态时，他可以重新加入ISR。因此如果leader宕了，**直接从ISR中选择一个follower**就行；不同的topic下不同的partitioner有不同的leader，避免n×n的复杂链路，保证了一致性；ISR(0,1,all)反馈ack之后leader反馈commit给client
 ![](https://images2018.cnblogs.com/blog/137084/201806/137084-20180616151857110-745671907.png)
 
-2. 区别于ZK：zookeeper使用了ZAB(Zookeeper Atomic Broadcast)协议，保证了leader,follower的一致性，**leader 负责数据的读写**，而**follower只负责数据的读**，如果follower遇到**写操作，会提交到leader**;超过半数当leader；leader 的更新操作是按照queue队列发给follower的，且leader收到超过半数的ack就会给client返回commit消息，但是有可能更新还未成功写入到follower中，且有时差
+2. 区别于ZK：zookeeper使用了ZAB(Zookeeper Atomic Broadcast)协议，保证了leader,follower的一致性，**leader 负责数据的读写**，而 **follower只负责数据的读**，如果follower遇到 **写操作会提交到leader**;超过半数当leader；leader 的更新操作是按照 **queue队列**发给follower的，且leader收到超过半数的ack就会给client返回commit消息，但是有可能更新还未成功写入到follower中，且有时差
 ![](https://images2018.cnblogs.com/blog/137084/201806/137084-20180616151745378-1678869628.png)
 
 ### producer写入流程 ###
@@ -179,13 +179,13 @@ producer&consumer&broker(处理读写请求和存储消息，通过zookeeper协�
 
 ## exactly-once 语义 ##
 一个sender发送一条message到receiver。根据receiver出现fail时sender如何处理fail，可以将message delivery分为三种语义:
-1. **At Most once**：sender把message发送给receiver.无论receiver是否收到message,sender都不再重发message；receiver**最多收到一次**(0次或1次)
-2. **At Least once**：sender把message发送给receiver.当receiver在规定时间内没有回复ACK或回复了error信息,那么sender重发这条message给receiver,直到sender收到receiver的ACK；receiver**最少收到一次**(1次及以上)
+1. **At Most once**：sender把message发送给receiver.无论receiver是否收到message,sender都不再重发message；receiver **最多收到一次**(0次或1次)
+2. **At Least once**：sender把message发送给receiver.当receiver在规定时间内没有回复ACK或回复了error信息,那么sender重发这条message给receiver,直到sender收到receiver的ACK；receiver **最少收到一次**(1次及以上)
 3. **Exactly once**：一条message,receiver确保只“收到”一次
 
 ### Flink的EO实现 ###
 flink持续地对整个系统做snapshot，然后把global state(根据config文件设定)储存到master node或HDFS。当系统出现failure，Flink会停止数据处理，然后把系统恢复到最近的一次checkpoint。
-1. global state由**空间上分立**的process和连接这些process的channel组成(process不共享memory，通过在communication channel上进行的message pass来异步交流)，global state就是所有process,channel的local state的集合
+1. global state由 **空间上分立**的process和连接这些process的channel组成(process不共享memory，通过在communication channel上进行的message pass来异步交流)，global state就是所有process,channel的local state的集合
 
 > process的local state取决于the state of local memory and the history of its activity.
 > 

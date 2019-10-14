@@ -49,17 +49,17 @@
 3. 权限控制、存储和调优都是在CF的层面进行的
 4. 同一CF下的数据存储在同一目录下，由几个文件保存。列族尽量少，减少文件的寻址时间
 
-### timestamp 时间戳(版本号)###
+### timestamp 时间戳(版本号) ###
 1. 版本控制，区别cell下的数据版本。按照时间倒序排列，最新的在最前
 64位整型数据
 
 ### cell ###
 1. 行列坐标交叉决定。有版本区分，即保存着不同版本的数据。
-2. cell中是未解析的**字节数组**，以字节码的形式存储，不需要数据类型定义。
-3. 唯一确定：{rowkey,column(<cf>+<q>,version)} => cell
+2. cell中是未解析的 **字节数组**，以字节码的形式存储，不需要数据类型定义。
+3. 唯一确定：{rowkey,column(cf + q,version)} => cell
 
 ### HLog ###
-1. 普通的Hadoop Sequence File。有**操作日志**和操作的**数据信息**。
+1. 普通的Hadoop Sequence File。有 **操作日志**和操作的 **数据信息**。
 2. HLog的Key是HLogKey对象，其中记录了写入数据的归属信息，包括table和region的名字，还有sequence number和timestamp
 3. HLog的Value是HBase的KeyValue对象，对应HFile中的KeyValue
 
@@ -105,7 +105,7 @@
 4. 扫描.META.region的集合，计算得到当前还未分配的region，将他们放入待分配region列表
 
 ### HMaster下线 ###
-1. master下线仅导致所有**元数据的修改被冻结**(无法**创建删除**表，无法**修改**表的schema，无法进行region的**负载均衡**，无法处理**region上下线**，无法进行region的**合并**，唯一例外的是region的**split可以正常进行**，因为只有RS参与)，表的数据**读写还可以正常进行**。因此master下线短时间内对整个hbase集群没有影响
+1. master下线仅导致所有 **元数据的修改被冻结**(无法 **创建删除**表，无法 **修改**表的schema，无法进行region的 **负载均衡**，无法处理 **region上下线**，无法进行region的 **合并**，唯一例外的是region的 **split可以正常进行**，因为只有RS参与)，表的数据 **读写还可以正常进行**。因此master下线短时间内对整个hbase集群没有影响
 2. zk选出新的Master
 
 ## HRegionServer作用 ##
@@ -128,7 +128,7 @@
 
 ### RegionServer下线 ###
 1. RS下线，和ZK的session断开，zk释放RS对文件的独占锁
-2. Master不断轮询Server目录下文件的锁状态，Master发现某个RegionServer**丢失自己的的独占锁**，或者Master连续几次和RegionServer**通信都无法成功**，Master就尝试去获取代表这个RegionServer的**读写锁**
+2. Master不断轮询Server目录下文件的锁状态，Master发现某个RegionServer **丢失自己的的独占锁**，或者Master连续几次和RegionServer **通信都无法成功**，Master就尝试去获取代表这个RegionServer的 **读写锁**
 3. Master确定RS下线后，删除Server目录下代表这台RegionServer的文件，并将这台RegionServer的Region分配给其他还活着的节点
 
 
@@ -144,8 +144,8 @@
 1. 客户端访问Regions之前会先查看本地的缓存。缓存包括-ROOT-、.META.表和Regions的位置信息。
 2. 没有缓存就询问有Regions元数据的.META.表所在的HRegionServer
 3. .META.表也没查到就找有.META.表元数据Region的-ROOT-表，从而找到.META.继而找到Regions
-4. 若前面的信息全部**失效**就通过zookeeper重新定位-ROOT-、.META.表以及Regions的位置信息。此时需要进行6次网络来回才能定位到Regions(信息为空的时候，需要3次缓存更新；信息失效会先需要3次网络来回，验证信息确实失效，然后再有3次更新信息缓存，3+3=6)
-5. HBase能提供**实时计算服务**主要原因是由其架构和底层的数据结构决定的，即由LSM-Tree(Log-Structured Merge-Tree) + HTable(region分区) + Cache决定——客户端可以直接定位到要查数据所在的HRegion server服务器，然后直接在服务器的一个region上查找要匹配的数据，并且这些数据部分是经过cache缓存的
+4. 若前面的信息全部 **失效**就通过zookeeper重新定位-ROOT-、.META.表以及Regions的位置信息。此时需要进行6次网络来回才能定位到Regions(信息为空的时候，需要3次缓存更新；信息失效会先需要3次网络来回，验证信息确实失效，然后再有3次更新信息缓存，3+3=6)
+5. HBase能提供 **实时计算服务**主要原因是由其架构和底层的数据结构决定的，即由LSM-Tree(Log-Structured Merge-Tree) + HTable(region分区) + Cache决定——客户端可以直接定位到要查数据所在的HRegion server服务器，然后直接在服务器的一个region上查找要匹配的数据，并且这些数据部分是经过cache缓存的
 
 
 ![](https://uploadfiles.nowcoder.com/images/20190524/4206388_1558706472244_73AC7C87A9A6D2EB3C6C3DEB988F62B4)

@@ -8,6 +8,9 @@
     - [堆排序](#%E5%A0%86%E6%8E%92%E5%BA%8F)
     - [比较次数和初始序列](#%E6%AF%94%E8%BE%83%E6%AC%A1%E6%95%B0%E5%92%8C%E5%88%9D%E5%A7%8B%E5%BA%8F%E5%88%97)
     - [确定最终位置](#%E7%A1%AE%E5%AE%9A%E6%9C%80%E7%BB%88%E4%BD%8D%E7%BD%AE)
+- [基础题吧](#%E5%9F%BA%E7%A1%80%E9%A2%98%E5%90%A7)
+    - [整数区间合并](#%E6%95%B4%E6%95%B0%E5%8C%BA%E9%97%B4%E5%90%88%E5%B9%B6)
+    - [众数](#%E4%BC%97%E6%95%B0)
     - [链表](#%E9%93%BE%E8%A1%A8)
         - [头插法](#%E5%A4%B4%E6%8F%92%E6%B3%95)
         - [原地逆置](#%E5%8E%9F%E5%9C%B0%E9%80%86%E7%BD%AE)
@@ -25,6 +28,7 @@
 - [二叉树](#%E4%BA%8C%E5%8F%89%E6%A0%91)
     - [广度优先遍历BFS-Queue | 用于计算深度高度](#%E5%B9%BF%E5%BA%A6%E4%BC%98%E5%85%88%E9%81%8D%E5%8E%86bfs-queue-%7C-%E7%94%A8%E4%BA%8E%E8%AE%A1%E7%AE%97%E6%B7%B1%E5%BA%A6%E9%AB%98%E5%BA%A6)
     - [深度优先遍历DFS-Stack | 用于前中后序遍历](#%E6%B7%B1%E5%BA%A6%E4%BC%98%E5%85%88%E9%81%8D%E5%8E%86dfs-stack-%7C-%E7%94%A8%E4%BA%8E%E5%89%8D%E4%B8%AD%E5%90%8E%E5%BA%8F%E9%81%8D%E5%8E%86)
+    - [Dijkstra 算法](#dijkstra-%E7%AE%97%E6%B3%95)
     - [朋友圈 lt547](#%E6%9C%8B%E5%8F%8B%E5%9C%88-lt547)
     - [分糖果](#%E5%88%86%E7%B3%96%E6%9E%9C)
         - [Rating高的多于Rating低的](#rating%E9%AB%98%E7%9A%84%E5%A4%9A%E4%BA%8Erating%E4%BD%8E%E7%9A%84)
@@ -97,6 +101,67 @@ quickSort(list[],low,high):
 4. 堆排序属于选择排序，每次都将大根堆的根结点与表尾结点交换，确定其最终位置
 5. 二路归并排序每趟对子表进行两两归并从而得到若干个局部有序的结果，但无法确定最终位置
 
+<a id="%E5%9F%BA%E7%A1%80%E9%A2%98%E5%90%A7"></a>
+# 基础题吧 #
+<a id="%E6%95%B4%E6%95%B0%E5%8C%BA%E9%97%B4%E5%90%88%E5%B9%B6"></a>
+## 整数区间合并 ##
+```java
+import java.util.*;
+public class MainSolution {
+    public static void main(String[] args){
+        Scanner sc = new Scanner(System.in);
+        //接收输入的区间集合如: 1,3/n2,4/n5,8/n10,15
+        int nums = Integer.parseInt(sc.nextLine());
+        String tmpInput = "";
+        int[] startList = new int[nums];
+        int[] endList = new int[nums];
+        for (int i=0;i<nums;i++){
+            tmpInput = sc.nextLine();
+            startList[i] = Integer.parseInt(tmpInput.split(",")[0]);
+            endList[i] = Integer.parseInt(tmpInput.split(",")[1]);
+        }//将start和end分别排好序，便于合并
+        Arrays.sort(startList);
+        Arrays.sort(endList);
+        mergeInterval(startList,endList);
+    }
+    public static void mergeInterval(int[] start, int[] end){
+        int len = start.length;
+        //Map用于存储最终的区间起始值，没有new一个区间的class Interval，临时用HashMap存储
+        Map<Integer, Integer> resMap = new HashMap<>();
+        for (int i=0,j=0;i<start.length;i++){
+            //不合并的条件是下一个开始要大于前一个的结束如:1,2/n3,4 => 合并为1,2
+            //当i==len-1的时候意味着走到了最后一个区间，直接将上一个start[j]作为开始，end[i]作为区间结尾添加即可
+            if (i == len-1||start[i+1]>end[i]){
+                resMap.put(start[j], end[i]);
+                //3,4作为下一个区间的开始继续
+                j= i+1;
+            }
+        }Set<Map.Entry<Integer, Integer>> entSet = resMap.entrySet();
+        for (Map.Entry<Integer, Integer> tmpEnt : entSet)
+            System.out.println(tmpEnt.getKey()+","+tmpEnt.getValue());
+    }
+}
+
+```
+<a id="%E4%BC%97%E6%95%B0"></a>
+## 众数 ##
+这里众数特制出现次数大于len/2向下取整，或者大于等于len/2向上取整
+```java
+import java.util.*;
+public class MainSolution {
+    public static void main(String[] args){
+        Scanner sc = new Scanner(System.in);
+        String tmpInput = sc.nextLine();
+        int len = tmpInput.split(" ").length;
+        int[] inputList = new int[len];
+        for (int i=0;i<len;i++)
+            inputList[i] = Integer.parseInt(tmpInput.split(" ")[i]);
+        Arrays.sort(inputList);
+        System.out.println(inputList[(int)Math.floor(len/2.0)]);
+    }
+}
+
+```
 
 <a id="%E9%93%BE%E8%A1%A8"></a>
 ## 链表 ##
@@ -106,11 +171,11 @@ quickSort(list[],low,high):
 while(oldList.hasNext()):
     //赋值给一个新节点
     Node newNode = oldHead.next;
-    //记录头插新链表的链接信息
+    //新链表接到新节点之后
     newNode.next = newHead.next;
-    //头插新链表的新链接
+    //新节点接在新头节点之后
     newHead.next = newNode;
-    //新节点连到头后面
+    //原链表向后遍历
     oldHead = oldHead.next;
 
 ```
@@ -661,6 +726,20 @@ public void DFS(Node root){
     }
 }
 ```
+
+<a id="dijkstra-%E7%AE%97%E6%B3%95"></a>
+## Dijkstra 算法 ##
+>迪杰斯特拉(Dijkstra)算法是典型 **最短路径算法**，用于计算一个节点到其他节点的最短路径。它的主要特点是以起始点为中心向外层层扩展(广度优先搜索思想)，直到扩展到终点为止。
+
+![dijkstra](https://upload-images.jianshu.io/upload_images/9949918-ca1f25e72f90f53c.png?imageMogr2/auto-orient/strip|imageView2/2/w/276/format/webp)
+
+1. 指定一个节点，例如我们要计算 'A' 到其他节点的最短路径
+2. 引入两个集合（S、U），S集合包含已求出的最短路径的点（以及相应的最短长度），U集合包含未求出最短路径的点（以及A到该点的路径，注意 如上图所示，A->C由于没有直接相连 初始时为∞）
+3. 初始化两个集合，S集合初始时 只有当前要计算的节点，`A->A = 0`，
+U集合初始时为 `A->B = 4, A->C = ∞, A->D = 2, A->E = ∞`
+4. 从U集合中找出路径最短的点，加入S集合，例如 `A->D = 2`
+5. 更新U集合路径，`if ( 'D 到 B,C,E 的距离' + 'AD 距离' < 'A 到 B,C,E 的距离' )` 则更新U
+6. 循环执行 4、5 两步骤，直至遍历结束，得到A 到其他节点的最短路径
 
 <a id="%E6%9C%8B%E5%8F%8B%E5%9C%88-lt547"></a>
 ## 朋友圈 lt547 ##
