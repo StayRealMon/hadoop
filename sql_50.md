@@ -30,7 +30,7 @@
 
 
 写一条sql删除订单表中重复的记录
-一张网页浏览信息表，有两列，一列是网页ip，一列是浏览网页的用户（比如a或者b、c、d直到z），求这些网页被a和b或者a和c或者b和c**两两组合访问**的次数
+一张网页浏览信息表，有两列，一列是网页ip，一列是浏览网页的用户（比如a或者b、c、d直到z），求这些网页被a和b或者a和c或者b和c **两两组合访问**的次数
 单科成绩高于该科平均成绩的同学名单（无论该学生有多少科，只要有一科满足即可
 sql题：找出单科成绩高于该科平均成绩的同学名单（该学生所有科都必须满足
 sql查询，找出互相关注的用户对数
@@ -273,10 +273,10 @@ substr(X,Y,Z) 或 substr(X,Y) 函数的使用。
 其中X是要截取的字符串。
 Y是字符串的起始位置（注意第一个字符的位置为1，而不为0），取值范围是±(1~length(X))，当Y等于length(X)时，则截取最后一个字符；当Y等于负整数-n时，则从倒数第n个字符处截取。
 Z是要截取字符串的长度，取值范围是正整数，若Z省略，则从Y处一直截取到字符串末尾；若Z大于剩下的字符串长度，也是截取到字符串末尾为止。
-
+```sql
 	SELECT first_name FROM employees ORDER BY substr(first_name,length(first_name)-1)
 	SELECT first_name FROM employees ORDER BY substr(first_name,-2)
-
+```
 ## 聚合函数group_concat(X,Y) ##
 SQLite的聚合函数group_concat(X,Y)，其中X是要连接的字段，Y是连接时用的符号，可省略，默认为逗号。此函数必须与 GROUP BY 配合使用。
 ```sql

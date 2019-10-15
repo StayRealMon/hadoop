@@ -228,7 +228,7 @@ AS()中的数据是处理后的数据，对应insert新表的fields
 
 ## Hive 分桶 ##
 1. 目的是为了数据抽样(Sampling)和map-join，在表的分区下面进行分桶操作，将原来的大表根据某个字段散列到buckets中，每个bucket会有相同哈希值的字段值，便于抽样或者根据字段进行join操作，看作是partition更细的粒度
-2. buckets的个数一般和reduce的个数一致**(待确认，reduce的个数如何确定，是人为设置的吗？)**。分桶之前要先把数据存在原来的表中，然后根据字段建bucket_table，from原来的table中查数据insert into到bucket_table中，这个insert过程是MR过程，将数据从block中找到再放到新的block中，每个bucket都有自己的目录
+2. buckets的个数一般和reduce的个数一致 **(待确认，reduce的个数如何确定，是人为设置的吗？)**。分桶之前要先把数据存在原来的表中，然后根据字段建bucket_table，from原来的table中查数据insert into到bucket_table中，这个insert过程是MR过程，将数据从block中找到再放到新的block中，每个bucket都有自己的目录
 3. 进行sampling的时候有x和y两个值需要注意，从第x个bucket开始抽y个数据，y是buckets的数量的倍数或者因子，因子的时候取多个buckets，倍数的时候取第x个bucket中的1/n数据
 
 
