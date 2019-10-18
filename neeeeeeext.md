@@ -11,8 +11,8 @@
 1. A Hierarchical Extreme Learning Machine：`we first propose a weighted output extreme learning machine (WO-ELM) to learn the imbalanced data`，对不同的imbalance ratio进行对比，对不同算法在不同的IR下对比较
 2. A Novel Ensemble Approach for Click-Through Rate：`FM+GBDT`，`GFM, which is an ensemble learning of FM and GBDT`，FM做线性特征，GBDT做其他特征，attention mechanism做高阶特征选择如DIN和DIEN，目的是更加的个性化，不同用户对不同特征的注意度是不同的。数据集用的是movie-lens 和 KKBox；评价指标Hit Ratio (HR)和Normalized Discounted Cumulative Gain
 (NDCG)
-3. minimum redundancy-maximum relevance (mRMR) 用作特征值选择
-
+3. Accurate Prediction of Advertisement Clicks based on Impression：minimum redundancy-maximum relevance (mRMR) 用作特征值选择（能够选出具有最大相关性的最小特征子集），传统的简单算法做核心预测；dataset来自于 dashboard of an OTA，经过enrich处理，指标rmse和r2
+4. Deep Interest Evolution Network ：增加了一层 interest extractor layer，用于提取用户兴趣特征，部署到淘宝，获得了20.7%的CTR提升；数据集采用Amazon Dataset 中的书籍和电子商品，工程数据用阿里内部的49天日志采集数据
 
 ## 网络安全
 1. 如果要做出网络安全作品(系统安全/应用安全/网络安全/数据安全/安全检测)五大类中的，目前想法结合flink做异常检测，携程好像是有现成的异常检测报警服务的，结合了ai方法，多留意下其他方向的应用
