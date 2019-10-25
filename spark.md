@@ -114,7 +114,7 @@ Action(foreach/count/collect)
 2. Spark on Hive，即SparkSQL，其中Hive作为存储，解析优化和执行引擎都是Spark
 3. Hive on Spark，解析和优化都是Hive，Spark作为执行引擎，底层不是MR而是Spark job
 4. DF是由列式RDD组成的，由sqlContext.read(文件)或者sqlContext.sql(sql语句)。df = sqlContext.read().format().load(); df.show(); df.preintSchema(); df.registerTempTable()可以将DF注册为临时表，临时表是个指针，不是disk或者memory中的文件
-5. df和RDD互相转化**df->RDD**:Java<Row> rdd = df.javaRDD() **RDD->df**:sqlContext.createDataFrame(RDD, obj.class)利用反射机制，自定义类要实现序列化接口(节点之间传送对象的时候必须序列化，)
+5. df和RDD互相转化 **df->RDD**:Java<Row> rdd = df.javaRDD() **RDD->df**:sqlContext.createDataFrame(RDD, obj.class)利用反射机制，自定义类要实现序列化接口(节点之间传送对象的时候必须序列化，)
 
 ## 消息队列特点 ##
 1. **解耦**，将一个流程加入一层数据接口拆分成两个部分，上游专注通知，下游专注处理
@@ -192,7 +192,6 @@ flink持续地对整个系统做snapshot，然后把global state(根据config文
 > channel的local state是上游process发送进channel的message集减去下游process从channel接收的message的差集
 
 2. Chandy-Lamport算法保证了获得一致性global state，解决了Snapshot算法共享内存(globally shared memory)和全局时钟(global clock)的问题。该算法在普通message中插入了control message – **marker**
-3. 
 
 
 幂等操作：不管在处理的时候是否有错误发生，计算的结果（包括所有所改变的状态）都一样，因为计算操作是“恰好一次的”
