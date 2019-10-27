@@ -14,6 +14,8 @@
 3. Accurate Prediction of Advertisement Clicks based on Impression：minimum redundancy-maximum relevance (mRMR) 用作特征值选择（能够选出具有最大相关性的最小特征子集），传统的简单算法做核心预测；dataset来自于 dashboard of an OTA，经过enrich处理，指标rmse和r2
 4. Deep Interest Evolution Network ：增加了一层 interest extractor layer，用于提取用户兴趣特征，部署到淘宝，获得了20.7%的CTR提升；数据集采用Amazon Dataset 中的书籍和电子商品，工程数据用阿里内部的49天日志采集数据
 5. Deeply supervised model for click-through rate：query和CTR结合，利用CNN，提升2%点击率和0.5%的 normalized discounted cumulative gain (NDCG)；不需要特征工程；1 Billion条搜索引擎查询样本;LSTM用作查询语句训练text embedding
+6. Data-driven
+identification of accidental clicks ：误点击率？判断广告停留时间`dwell time`这个指标然后针对性的训练学习。数据集用到的是Yahoo的数据集,CTR+3.9%,revenue+0.2%
 
 ## 好思路
 1. 在[特征工程](https://github.com/luoda888/tianchi-diabetes-top12/blob/master/README.md)上下功夫（较好实现但是可能创新点不够？）特征提取用xgboost自动筛选，也可以用蚁群退火算法构造特征
