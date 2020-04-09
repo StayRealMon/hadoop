@@ -1,5 +1,14 @@
 # 待学习的零碎record
 
+
+## 0408
+### row_number()over()
+
+    - 窗口函数，用于计算/取值/排序/序列。group by一般用于聚合计算函数，开窗可以在组内进行排序和取值
+    - 非全局排序可以使用sort by 和 distribute by
+![功能描述](https://img-blog.csdnimg.cn/20190613222609630.png?x-oss-process=image/watermark,type_ZmFuZ3poZW5naGVpdGk,shadow_10,text_aHR0cHM6Ly9ibG9nLmNzZG4ubmV0L3dlaXhpbl80MzY2ODI5OQ==,size_16,color_FFFFFF,t_70)
+
+
 ##0219
 ### azkaban 工作流调度器
 1. crontab是linux自带的调度，适用于简单任务的调度；
@@ -18,4 +27,9 @@
 ### MYSQL中的时间
 1. date年月日 time时分秒 datetime年月日时分秒 timestamp时间戳
 2. unix_timestamp('y-m-d h:m:s')获得ts，from_timestamp(ts,'y-m-d h:m:s')获得datetime
-3. 
+
+
+##0224
+###toString方法
+
+###compareTo方法
