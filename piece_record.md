@@ -6,6 +6,8 @@
 
     - 窗口函数，用于计算/取值/排序/序列。group by一般用于聚合计算函数，开窗可以在组内进行排序和取值
     - 非全局排序可以使用sort by 和 distribute by
+    - distinct 能够去除完全相同的；group by能够去除之后字段相同的，且不能有多余的字段；row_number会加一列序号，排序可以以任一字段或多个字段，查询字段可以不参与分组和排序
+    - row_number的执行在where/groupby之后
 ![功能描述](https://img-blog.csdnimg.cn/20190613222609630.png?x-oss-process=image/watermark,type_ZmFuZ3poZW5naGVpdGk,shadow_10,text_aHR0cHM6Ly9ibG9nLmNzZG4ubmV0L3dlaXhpbl80MzY2ODI5OQ==,size_16,color_FFFFFF,t_70)
 
 
