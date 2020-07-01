@@ -1,64 +1,87 @@
 ## FATAL ##
-    git remote -v
-    git config --list
-    git status
-    git remote set-url origin 你的远端地址
-    
+```sh
+git remote -v
+git config --list
+git status
+git remote set-url origin '你的远端地址'
+```
+
 [https://blog.csdn.net/Leolu007/article/details/79129446](https://blog.csdn.net/Leolu007/article/details/79129446 "详情查看")
 
 ## 新的Git免密登录配置 ##
-> 查看是否有现有的公钥
-> cd ~/.ssh  No such file or directory
-> 进入根目录创建公钥
-> cd ~
-> ssh-keygen -t -rsa -c "xxx@qq.com"
-> 查看公钥
-> vi id_rsa.pub
-> 复制公钥到github账户，后进行本地配置
-> git -config --global user.name "yourname"
-> git -config --global user.email "xxx@qq.com"
-> 测试是否联通github仓库
-> ssh -T git@github.com
-> FINISHED！
+```sh
+#查看是否有现有的公钥
+cd ~/.ssh  No such file or directory
+#进入根目录创建公钥
+cd ~
+ssh-keygen -t -rsa -c "xxx@qq.com"
+#查看公钥
+vi id_rsa.pub
+#复制公钥到github账户，后进行本地配置
+git -config --global user.name "yourname"
+git -config --global user.email "xxx@qq.com"
+#测试是否联通github仓库
+ssh -T git@github.com
+FINISHED！
+```
 
 ## OTHERS ##
 ### 检查本机是否有ssh key设置 ###
-> $ cd ~/.ssh 或cd .ssh
-> 如果没有则提示： No such file or directory
-> 如果有则进入~/.ssh路径下（ls查看当前路径文件，rm * 删除所有文件）
+```sh
+$ cd \~/.ssh 或cd .ssh
+#如果没有则提示： No such file or directory
+#如果有则进入\~/.ssh路径下（ls查看当前路径文件，rm * 删除所有文件）
+```
 
 ### 使用Git Bash生成新的ssh key。 ###
-> $ cd ~  #保证当前路径在”~”下
-> $ ssh-keygen -t rsa -C "xxxxxx@yy.com"  #建议填写自己真实有效的邮箱地址
-> Generating public/private rsa key pair.
-> Enter file in which to save the key (/c/Users/xxxx_000/.ssh/id_rsa):   #不填直接回车
-> Enter passphrase (empty for no passphrase):   #输入密码（可以为空）
-> Enter same passphrase again:   #再次确认密码（可以为空）
-> Your identification has been saved in /c/Users/xxxx_000/.ssh/id_rsa.   #生成的密钥
-> Your public key has been saved in /c/Users/xxxx_000/.ssh/id_rsa.pub.  #生成的公钥
-> The key fingerprint is:
-> e3:51:33:xx:xx:xx:xx:xxx:61:28:83:e2:81 xxxxxx@yy.com
-> *本机已完成ssh key设置，其存放路径为：c:/Users/xxxx_000/.ssh/下。
-> 注释：可生成ssh key自定义名称的密钥，默认id_rsa。
-> $ ssh-keygen -t rsa -C "邮箱地址" -f ~/.ssh/githug_blog_keys #生成ssh key的名称为githug_blog_keys，慎用容易出现其它异常。
-
+```sh
+#保证当前路径在”~”下
+$ cd ~  
+#建议填写自己真实有效的邮箱地址
+$ ssh-keygen -t rsa -C "xxxxxx@yy.com"  
+Generating public/private rsa key pair.
+#不填直接回车
+Enter file in which to save the key (/c/Users/xxxx_000/.ssh/id_rsa):  
+#输入密码（可以为空） 
+Enter passphrase (empty for no passphrase):
+#再次确认密码（可以为空）
+Enter same passphrase again:   
+#生成的密钥
+Your identification has been saved in /c/Users/xxxx_000/.ssh/id_rsa.   
+#生成的公钥
+Your public key has been saved in /c/Users/xxxx_000/.ssh/id_rsa.pub.  
+The key fingerprint is:
+e3:51:33:xx:xx:xx:xx:xxx:61:28:83:e2:81 xxxxxx@yy.com
+#*本机已完成ssh key设置，其存放路径为：c:/Users/xxxx_000/.ssh/下。
+#注释：可生成ssh key自定义名称的密钥，默认id_rsa。
+#生成ssh key的名称为githug_blog_keys，慎用容易出现其它异常。
+$ ssh-keygen -t rsa -C "邮箱地址" -f ~/.ssh/githug_blog_keys 
+```
 ### 添加ssh key到GItHub ###
-> 登录GitHub系统；点击右上角账号头像的“▼”→Settings→SSH kyes→Add SSH key。
-> 
-> 复制id_rsa.pub的公钥内容。 
-> 1) 进入c:/Users/xxxx_000/.ssh/目录下，打开id_rsa.pub文件，全选复制公钥内容。
-> 2) Title自定义，将公钥粘贴到GitHub中Add an SSH key的key输入框，最后“Add Key”
+
+ - 登录GitHub系统；点击右上角账号头像的“▼”→Settings→SSH kyes→Add SSH key。
+ - 复制id_rsa.pub的公钥内容。 
+     + 进入c:/Users/xxxx_000/.ssh/目录下，打开`id_rsa.pub`文件，全选复制公钥内容。
+     + Title自定义，将公钥粘贴到GitHub中Add an SSH key的key输入框，最后`Add Key`
 
 ### 配置账户 ###
-> $ git config --global user.name “your_username”  #设置用户名
-> $ git config --global user.email “your_registered_github_Email”  #设置邮箱地址(建议用注册giuhub的邮箱)
+```sh
+#设置用户名
+$ git config --global user.name “your_username”  
+#设置邮箱地址(建议用注册giuhub的邮箱)
+$ git config --global user.email “your_registered_github_Email”  
+```
 
 ### 测试ssh keys是否设置成功 ###
-> $ ssh -T git@github.com
-> The authenticity of host 'github.com (192.30.252.129)' can't be established.
-> RSA key fingerprint is 16:27:xx:xx:xx:xx:xx:4d:eb:df:a6:48.
-> Are you sure you want to continue connecting (yes/no)? yes #确认你是否继续联系，输入yes
-> Warning: Permanently added 'github.com,192.30.252.129' (RSA) to the list of known hosts.
-> Enter passphrase for key '/c/Users/xxxx_000/.ssh/id_rsa':  #生成ssh kye是密码为空则无此项，若设置有密码则有此项且，输入生成ssh key时设置的密码即可。
-> Hi xxx! You've successfully authenticated, but GitHub does not provide shell access. #出现词句话，说明设置成功。
-
+```sh
+$ ssh -T git@github.com
+The authenticity of host 'github.com (192.30.252.129)' can\'t be established.
+RSA key fingerprint is 16:27:xx:xx:xx:xx:xx:4d:eb:df:a6:48.
+#确认你是否继续联系，输入yes
+Are you sure you want to continue connecting (yes/no)? yes 
+Warning: Permanently added 'github.com,192.30.252.129' (RSA) to the list of known hosts.
+#生成ssh kye是密码为空则无此项，若设置有密码则有此项且，输入生成ssh key时设置的密码即可。
+Enter passphrase for key '/c/Users/xxxx_000/.ssh/id_rsa':  
+#出现这句话，说明设置成功。
+Hi xxx! You\'ve successfully authenticated, but GitHub does not provide shell access. 
+```
