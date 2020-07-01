@@ -85,3 +85,208 @@ Enter passphrase for key '/c/Users/xxxx_000/.ssh/id_rsa':  
 #出现这句话，说明设置成功。
 Hi xxx! You\'ve successfully authenticated, but GitHub does not provide shell access. 
 ```
+
+##Githug PLAY
+```
+# ruby
+apt install ruby
+root@ali1:/home/ts# ruby --version
+ruby 2.5.1p57 (2018-03-29 revision 63029) [x86_64-linux-gnu]
+# gem
+gem install githug
+# githug 
+root@ali1:/home/ts# githug
+********************************************************************************
+*                                    Githug                                    *
+********************************************************************************
+No githug directory found, do you wish to create one? [yn]  y
+Welcome to Githug!
+
+Name: init
+Level: 1
+
+root@ali1:/home/ts# cd git_hug/
+root@ali1:/home/ts/git_hug# git init
+Initialized empty Git repository in /home/ts/git_hug/.git/
+root@ali1:/home/ts/git_hug# githug play
+
+Name: config
+Level: 2
+
+root@ali1:/home/ts/git_hug# git config --local user.name aliyunUser
+root@ali1:/home/ts/git_hug# git config --local user.email xxx@qq.com
+root@ali1:/home/ts/git_hug# githug play
+
+Name: add
+Level: 3
+
+root@ali1:/home/ts/git_hug# ls
+README
+root@ali1:/home/ts/git_hug# git add README
+root@ali1:/home/ts/git_hug# githug play
+
+Name: commit
+Level: 4
+
+root@ali1:/home/ts/git_hug# git add README
+root@ali1:/home/ts/git_hug# git commit -m 'level4'
+[master (root-commit) 5713613] level4
+ 1 file changed, 0 insertions(+), 0 deletions(-)
+ create mode 100644 README
+root@ali1:/home/ts/git_hug# githug play
+
+Name: clone
+Level: 5
+
+root@ali1:/home/ts/git_hug# git clone https://github.com/Gazler/cloneme
+Cloning into 'cloneme'...
+remote: Enumerating objects: 7, done.
+remote: Total 7 (delta 0), reused 0 (delta 0), pack-reused 7
+Unpacking objects: 100% (7/7), done.
+root@ali1:/home/ts/git_hug# githug
+
+Name: clone_to_folder
+Level: 6
+
+root@ali1:/home/ts/git_hug# git clone https://github.com/Gazler/cloneme my_cloned_repo
+Cloning into 'my_cloned_repo'...
+remote: Enumerating objects: 7, done.
+remote: Total 7 (delta 0), reused 0 (delta 0), pack-reused 7
+Unpacking objects: 100% (7/7), done.
+root@ali1:/home/ts/git_hug# ls
+my_cloned_repo
+root@ali1:/home/ts/git_hug# githug play
+
+Name: ignore
+Level: 7
+
+root@ali1:/home/ts/git_hug# ls
+README.swp
+root@ali1:/home/ts/git_hug# vim .gitignore
+root@ali1:/home/ts/git_hug# githug play
+
+Name: include
+Level: 8
+
+root@ali1:/home/ts/git_hug# ls
+first.a  lib.a  second.a
+root@ali1:/home/ts/git_hug# vim .gitignore
+root@ali1:/home/ts/git_hug# githug play
+
+Name: status
+Level: 9
+
+root@ali1:/home/ts/git_hug# ls
+config.rb  database.yml  deploy.rb  Guardfile  README  setup.rb
+root@ali1:/home/ts/git_hug# git status
+On branch master
+
+No commits yet
+
+Changes to be committed:
+  (use "git rm --cached <file>..." to unstage)
+
+    new file:   Guardfile
+    new file:   README
+    new file:   config.rb
+    new file:   deploy.rb
+    new file:   setup.rb
+
+Untracked files:
+  (use "git add <file>..." to include in what will be committed)
+
+    database.yml
+
+root@ali1:/home/ts/git_hug# git add database.yml
+root@ali1:/home/ts/git_hug# git status
+On branch master
+
+No commits yet
+
+Changes to be committed:
+  (use "git rm --cached <file>..." to unstage)
+
+    new file:   Guardfile
+    new file:   README
+    new file:   config.rb
+    new file:   database.yml
+    new file:   deploy.rb
+    new file:   setup.rb
+
+root@ali1:/home/ts/git_hug# githug play
+
+Name: number_of_files_committed
+Level: 10
+
+root@ali1:/home/ts/git_hug# ls
+rubyfile1.rb  rubyfile4.rb  rubyfile5.rb  rubyfile6.rb  rubyfile7.rb
+root@ali1:/home/ts/git_hug# git status
+On branch master
+
+No commits yet
+
+Changes to be committed:
+  (use "git rm --cached <file>..." to unstage)
+
+    new file:   rubyfile1.rb
+    new file:   rubyfile4.rb
+    new file:   rubyfile5.rb
+
+Changes not staged for commit:
+  (use "git add <file>..." to update what will be committed)
+  (use "git checkout -- <file>..." to discard changes in working directory)
+
+    modified:   rubyfile5.rb
+
+Untracked files:
+  (use "git add <file>..." to include in what will be committed)
+
+    rubyfile6.rb
+    rubyfile7.rb
+
+root@ali1:/home/ts/git_hug# githug play
+
+Name: rm
+Level: 11
+
+root@ali1:/home/ts/git_hug# ls
+root@ali1:/home/ts/git_hug# git status
+On branch master
+
+No commits yet
+
+Changes to be committed:
+  (use "git rm --cached <file>..." to unstage)
+
+    new file:   deleteme.rb
+
+Changes not staged for commit:
+  (use "git add/rm <file>..." to update what will be committed)
+  (use "git checkout -- <file>..." to discard changes in working directory)
+
+    deleted:    deleteme.rb
+
+root@ali1:/home/ts/git_hug# git rm deleteme.rb
+rm 'deleteme.rb'
+root@ali1:/home/ts/git_hug# githug play
+
+Name: rm_cached
+Level: 12
+
+root@ali1:/home/ts/git_hug# git status
+On branch master
+
+No commits yet
+
+Changes to be committed:
+  (use "git rm --cached <file>..." to unstage)
+
+    new file:   deleteme.rb
+
+root@ali1:/home/ts/git_hug# git rm --cached  deleteme.rb
+rm 'deleteme.rb'
+root@ali1:/home/ts/git_hug# githug play
+
+Name: stash
+Level: 13
+```
