@@ -289,4 +289,27 @@ root@ali1:/home/ts/git_hug# githug play
 
 Name: stash
 Level: 13
+
+root@ali1:/home/ts/git_hug# ls
+lyrics.txt
+root@ali1:/home/ts/git_hug# git status
+On branch master
+Changes not staged for commit:
+  (use "git add <file>..." to update what will be committed)
+  (use "git checkout -- <file>..." to discard changes in working directory)
+
+  modified:   lyrics.txt
+
+no changes added to commit (use "git add" and/or "git commit -a")
+root@ali1:/home/ts/git_hug# git stash
+Saved working directory and index state WIP on master: 0206059 Add some lyrics
+root@ali1:/home/ts/git_hug# git status
+On branch master
+nothing to commit, working tree clean
+root@ali1:/home/ts/git_hug# githug
+
+Name: rename
+Level: 14
+
+
 ```
