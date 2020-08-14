@@ -313,3 +313,5 @@ Level: 14
 
 
 ```
+
+0815 cp ~/.ssh/id_rsa* /e/stayrealmon/backup
